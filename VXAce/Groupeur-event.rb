@@ -2,6 +2,33 @@
 # http://funkywork.blogspot.com
 
 #==============================================================================
+# ** Config_Consolidator
+#------------------------------------------------------------------------------
+#  Configuration du script
+#==============================================================================
+
+module Config_Consolidator
+
+	#--------------------------------------------------------------------------
+	# * Publication des m√©thodes
+	#--------------------------------------------------------------------------
+	extend self
+
+	#--------------------------------------------------------------------------
+	# * Rayon de non-perdition par d√©faut
+	#--------------------------------------------------------------------------
+	DEFAULT_LOST_ZONE = 6
+
+	#--------------------------------------------------------------------------
+	# * D√©calage des men√©s par rapport au meneur par d√©faut
+	#--------------------------------------------------------------------------
+	DEFAULT_DECAL = 2
+
+
+end
+
+
+#==============================================================================
 # ** Character_Utils
 #------------------------------------------------------------------------------
 #  Fonctions utiles
@@ -10,12 +37,12 @@
 module Character_Utils
 
 	#--------------------------------------------------------------------------
-	# * Publication des mÈthodes
+	# * Publication des m√©thodes
 	#--------------------------------------------------------------------------
 	extend self
 
 	#--------------------------------------------------------------------------
-	# * Retourne un caractËre en fonction de son id
+	# * Retourne un caract√®re en fonction de son id
 	#--------------------------------------------------------------------------
 	def get(char)
 		flag =  char.is_a?(Game_Character)
@@ -28,7 +55,7 @@ end
 #==============================================================================
 # ** Game_Character
 #------------------------------------------------------------------------------
-#  Ajoutes des outils de distances (et rend public certaines donnÈes)
+#  Ajoutes des outils de distances (et rend public certaines donn√©es)
 #==============================================================================
 
 class Game_Character
@@ -40,7 +67,7 @@ class Game_Character
 	attr_reader :move_succeed
 
 	#--------------------------------------------------------------------------
-	# * Donne la distance entre deux caractËres
+	# * Donne la distance entre deux caract√®res
 	#--------------------------------------------------------------------------
 	def distance_to(char)
 		char = Character_Utils.get(char)
@@ -50,7 +77,7 @@ class Game_Character
 	end
 
 	#--------------------------------------------------------------------------
-	# * Effectue une comparaison entre deux caractËres par rapport a une cible
+	# * Effectue une comparaison entre deux caract√®res par rapport a une cible
 	#--------------------------------------------------------------------------
 	def compare_distance(char, goal)
 		char = Character_Utils.get(char)
@@ -79,7 +106,7 @@ class Game_Event
 	alias consolidator_update update
 
 	#--------------------------------------------------------------------------
-	# * DÈfinis les collisions
+	# * D√©finis les collisions
 	#--------------------------------------------------------------------------
 	def collide
 		temp_x = $game_player.x
@@ -124,7 +151,7 @@ class Game_Event
 	end
 
 	#--------------------------------------------------------------------------
-	# * VÈrifie si le caractËre doit courrir
+	# * V√©rifie si le caract√®re doit courrir
 	#--------------------------------------------------------------------------
 	def dash?
 		flag = $game_map.groups.count do |group|  
@@ -139,13 +166,13 @@ end
 #==============================================================================
 # ** Pawn
 #------------------------------------------------------------------------------
-#  DÈscription d'un membre du groupe
+#  D√©scription d'un membre du groupe
 #==============================================================================
 
 class Pawn
 
 	#--------------------------------------------------------------------------
-	# * MÈthodes propre ‡ la classe
+	# * M√©thodes propre √† la classe
 	#--------------------------------------------------------------------------
 
 	class << self
@@ -185,21 +212,21 @@ class Pawn
 	end
 
 	#--------------------------------------------------------------------------
-	# * Retourne l'event reliÈ au Pawn
+	# * Retourne l'event reli√© au Pawn
 	#--------------------------------------------------------------------------
 	def event
 		Character_Utils.get(@id)
 	end
 
 	#--------------------------------------------------------------------------
-	# * DÈplace vers un caractËre
+	# * D√©place vers un caract√®re
 	#--------------------------------------------------------------------------
 	def move_to(goal)
 		event.move_toward_character(goal)
 	end
 
 	#--------------------------------------------------------------------------
-	# * Tourne en direction d'un caractËre
+	# * Tourne en direction d'un caract√®re
 	#--------------------------------------------------------------------------
 	def turn_to(goal)
 		event.turn_toward_character(goal)
@@ -237,19 +264,19 @@ end
 module Kernel
 
 	#--------------------------------------------------------------------------
-	# * AccËs public des mÈthodes
+	# * Acc√®s public des m√©thodes
 	#--------------------------------------------------------------------------
 	extend self
 
 	#--------------------------------------------------------------------------
-	# * CrÈe un Pawn avec une "Èmotion"
+	# * Cr√©e un Pawn avec une "√©motion"
 	#--------------------------------------------------------------------------
 	def event(id, emotion = :default)
 		Pawn.new(id, emotion)
 	end
 
 	#--------------------------------------------------------------------------
-	# * Fait vibrer un caractËre
+	# * Fait vibrer un caract√®re
 	#--------------------------------------------------------------------------
 	def buzz(id, amplitude = 0.1, duration = 30, periode = 30)
 		if SceneManager.scene_is?(Scene_Map)
@@ -270,13 +297,13 @@ end
 #==============================================================================
 # ** Game_Group
 #------------------------------------------------------------------------------
-#  DÈscription d'un groupe
+#  D√©scription d'un groupe
 #==============================================================================
 
 class Game_Group
 
 	#--------------------------------------------------------------------------
-	# * MÈthodes propre ‡ la classe
+	# * M√©thodes propre √† la classe
 	#--------------------------------------------------------------------------
 	class << self
 
@@ -288,7 +315,7 @@ class Game_Group
 		end
 
 		#--------------------------------------------------------------------------
-		# * DÈfini si un symbole est un comportemment
+		# * D√©fini si un symbole est un comportemment
 		#--------------------------------------------------------------------------
 		def behaviour?(var)
 			behaviours.include?(var.to_sym)
@@ -313,16 +340,8 @@ class Game_Group
 		@decal = decal
 		@type = :normal
 		@type = type if Game_Group.behaviour?(type)
-		@members = complement
-		@members.each do |member|
-			if member
-				unless member.is_a?(Pawn)
-					index = @members.index(member)
-					@members[index] = Pawn.new(member)
-					@members[index].speed = @leader.speed
-				end
-			end
-		end
+		@members = []
+		self.add(*complement)
 	end
 
 	#--------------------------------------------------------------------------
@@ -333,7 +352,7 @@ class Game_Group
 	end
 
 	#--------------------------------------------------------------------------
-	# * RedÈfini le leader
+	# * Red√©fini le leader
 	#--------------------------------------------------------------------------
 	def leader=(id)
 		unless id
@@ -378,7 +397,7 @@ class Game_Group
 			end
 			to_add = (member.is_a?(Pawn)) ? member : Pawn.new(member)
 			to_add.speed = @leader.speed
-			find = @members.find{|elt| elt.id == to_add.id}
+			find = @members.find{|elt| elt.id == to_add.id} if @members
 			@members << to_add unless find
 		end
 	end
@@ -402,7 +421,7 @@ class Game_Group
 	end
 	
 	#--------------------------------------------------------------------------
-	# * DÈtruit un groupe
+	# * D√©truit un groupe
 	#--------------------------------------------------------------------------
 	def delete
 		$game_map.groups.delete_at(@id)
@@ -418,7 +437,7 @@ class Game_Group
 	end
 
 	#--------------------------------------------------------------------------
-	# * ExÈcute les dÈplacements
+	# * Ex√©cute les d√©placements
 	#--------------------------------------------------------------------------
 	def update
 		return nil unless @leader
@@ -473,7 +492,7 @@ class Game_Group
 	end
 
 	#--------------------------------------------------------------------------
-	# * VÈrifie si un membre existe dans le groupe
+	# * V√©rifie si un membre existe dans le groupe
 	#--------------------------------------------------------------------------
 	def member_exists?(id)
 		return 0 unless @members
@@ -481,7 +500,7 @@ class Game_Group
 	end
 
 	#--------------------------------------------------------------------------
-	# * VÈrifie si un membre est perdu
+	# * V√©rifie si un membre est perdu
 	#--------------------------------------------------------------------------
 	def missed?(id)
 		member(id).event.distance_to(@leader.event) >= @lost_distance+(@members.length)
@@ -498,14 +517,14 @@ class Game_Group
 	end
 
 	#--------------------------------------------------------------------------
-	# * VÈrifie si le groupe est complet
+	# * V√©rifie si le groupe est complet
 	#--------------------------------------------------------------------------
 	def complete?
 		miss_people == 0
 	end
 
 	#--------------------------------------------------------------------------
-	# * VÈrifie si le groupe peut courrir
+	# * V√©rifie si le groupe peut courrir
 	#--------------------------------------------------------------------------
 	def dash?
 		@dash
@@ -541,7 +560,7 @@ class Game_Map
 	end
 
 	#--------------------------------------------------------------------------
-	# * Mise ‡ jours de la carte
+	# * Mise √† jours de la carte
 	#--------------------------------------------------------------------------
 	def update(main = false)
 		@groups.each do |group|
@@ -551,7 +570,7 @@ class Game_Map
 	end
 
 	#--------------------------------------------------------------------------
-	# * RÈcupËre un groupe
+	# * R√©cup√®re un groupe
 	#--------------------------------------------------------------------------
 	def group(id)
 		return @groups[id]
@@ -560,33 +579,43 @@ class Game_Map
 	#--------------------------------------------------------------------------
 	# * Ajoute un groupe
 	#--------------------------------------------------------------------------
-	def add_group(id, lose, decal, leader, *members)
-		@groups[id] = Game_Group.new(id, lose, decal, leader, *members)
+	def add_group(id, lose, decal, type, leader, *members)
+		@groups[id] = Game_Group.new(id, lose, decal, type, leader, *members)
 	end
 end
 
 #==============================================================================
 # ** Game_Interpreter
 #------------------------------------------------------------------------------
-#  Ajoute les fonctionnalitÈs des groupes
+#  Ajoute les fonctionnalit√©s des groupes
 #==============================================================================
 
 class Game_Interpreter
 
 	#--------------------------------------------------------------------------
-	# * CrÈe un groupe
+	# * Cr√©e un groupe
 	# id = identifiant du groupe
 	# lose = Distance max avant qu'un event soit perdu
-	# decal = Le dÈcalage positionnel des membres
+	# decal = Le d√©calage positionnel des membres
 	# leader = Id du leader
 	# *members = liste des membres
 	#--------------------------------------------------------------------------
-	def create_group(id, lose, decal, leader, *members)
-		$game_map.add_group(id, lose, decal, leader, *members)
+	def create_group(id, lose, decal, type, leader, *members)
+		$game_map.add_group(id, lose, decal, type, leader, *members)
 	end
 
 	#--------------------------------------------------------------------------
-	# * RecupËre un groupe (pour lui appliquer des transformations)
+	# * Cr√©e un groupe simplement avec des param√®tres par d√©faut
+	# id = identifiant du groupe
+	# leader = Id du leader
+	# *members = liste des membres
+	#--------------------------------------------------------------------------
+	def create_simple_group(id, leader, *members)
+		$game_map.add_group(id, Config_Consolidator::DEFAULT_LOST_ZONE, Config_Consolidator::DEFAULT_DECAL,:normal, leader, *members)
+	end
+
+	#--------------------------------------------------------------------------
+	# * Recup√®re un groupe (pour lui appliquer des transformations)
 	#--------------------------------------------------------------------------
 	def group(id)
 		return $game_map.group(id)
