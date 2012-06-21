@@ -1,4 +1,4 @@
-# Consolidator par S4suk3; Fabien; XHTMLBoy
+# Consolidator par S4suk3; Fabien; XHTMLBoy (et merci à Nuki et Ulis !)
 # http://funkywork.blogspot.com
 
 #==============================================================================
