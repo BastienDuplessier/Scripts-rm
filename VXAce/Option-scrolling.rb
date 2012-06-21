@@ -5,6 +5,7 @@ module ScrollingConfig
     DEFAULT_TYPE = :not
     extend self
     def map_notscrollable
+        # Ajouter ici les map non scrollables
         []
     end
 end
