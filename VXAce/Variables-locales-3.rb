@@ -21,7 +21,7 @@ class Simple_Matrix
 	end
 
 	#--------------------------------------------------------------------------
-	# * RÃ©cupÃ¨re une valeur
+	# * Récupère une valeur
 	#--------------------------------------------------------------------------
 	def [](*keys)
 		table, f_key = @table, keys.pop
@@ -61,7 +61,7 @@ module Command
 	extend self
 
 	#--------------------------------------------------------------------------
-	# * OpÃ©randes standards
+	# * Opérandes standards
 	#--------------------------------------------------------------------------
 	def random(x, y) (x + rand(y - x)) end
 	def map_id() $game_map.map_id end
@@ -70,7 +70,7 @@ module Command
 		$game_variables[id] = value 
 	end
 	#--------------------------------------------------------------------------
-	# * OpÃ©randes de partie
+	# * Opérandes de partie
 	#--------------------------------------------------------------------------
 	def team_size() $game_party.members.size end
 	def gold() $game_party.gold end
@@ -80,13 +80,13 @@ module Command
 	def save_count() $game_system.save_count end
 	def battle_count() $game_system.battle_count end
 	#--------------------------------------------------------------------------
-	# * OpÃ©randes d'objets
+	# * Opérandes d'objets
 	#--------------------------------------------------------------------------
 	def item_count(id) $game_party.item_number($data_items[id]) end
 	def weapon_count(id) $game_party.item_number($data_weapons[id]) end
 	def armor_count(id) $game_party.item_number($data_armors[id]) end
 	#--------------------------------------------------------------------------
-	# * OpÃ©randes d'acteurs
+	# * Opérandes d'acteurs
 	#--------------------------------------------------------------------------
 	def actor(id) $game_actors[id] end
 	def level(id) $game_actors[id].level end
@@ -102,7 +102,7 @@ module Command
 	def agility(id) $game_actors[id].agi end
 	def lucky(id) $game_actors[id].luk end
 	#--------------------------------------------------------------------------
-	# * OpÃ©randes d'events
+	# * Opérandes d'events
 	#--------------------------------------------------------------------------
 	def event_x(id) 
 		character = $game_player
@@ -136,23 +136,23 @@ module Command
 	def heroes_screen_y() Command.event_screen_y(0) end
 	def distance_between_case(ev1, ev2)
 		event1 = (ev1 == 0) ? $game_player : $game_map.events[ev1]
-    	event2 = (ev2 == 0) ? $game_player : $game_map.events[ev2]
-    	Math.hypot((event1.x - event2.x), (event1.y-event2.y))
+		event2 = (ev2 == 0) ? $game_player : $game_map.events[ev2]
+		Math.hypot((event1.x - event2.x), (event1.y-event2.y))
 	end
 	def distance_between_pixel(ev1, ev2)
 		event1 = (ev1 == 0) ? $game_player : $game_map.events[ev1]
-    	event2 = (ev2 == 0) ? $game_player : $game_map.events[ev2]
-    	Math.hypot((event1.screen_x - event2.screen_x), (event1.screen_y-event2.screen_y))
+		event2 = (ev2 == 0) ? $game_player : $game_map.events[ev2]
+		Math.hypot((event1.screen_x - event2.screen_x), (event1.screen_y-event2.screen_y))
 	end
 	#--------------------------------------------------------------------------
-	# * OpÃ©randes de partie
+	# * Opérandes de partie
 	#--------------------------------------------------------------------------
 	def actor_id(position) 
 		$game_party.members[position]
 		return actor ? actor.id : 0
 	end
 	#--------------------------------------------------------------------------
-	# * Commande de lecture de la base de donnÃ©es
+	# * Commande de lecture de la base de données
 	#--------------------------------------------------------------------------
 	def read_data_monster(id, method = false)
 		monster = $data_enemies[id]
@@ -186,7 +186,7 @@ end
 class Game_Interpreter
 
 	#--------------------------------------------------------------------------
-	# * RÃ©cupÃ©ration d'une variable local
+	# * Récupération d'une variable local
 	#--------------------------------------------------------------------------
 	def get(*arguments)
 		result = 0
@@ -216,7 +216,7 @@ class Game_Interpreter
 	def command(command, *arguments) cmd(command, *arguments) end
 
 	#--------------------------------------------------------------------------
-	# * API de rÃ©cupÃ©rations des monstres/acteurs/techniques
+	# * API de récupérations des monstres/acteurs/techniques
 	#--------------------------------------------------------------------------
 	def ennemy(id) cmd(:read_data_monster, id) end
 	def actor(id) cmd(:actor, id) end
@@ -241,7 +241,7 @@ module DataManager
 		alias local_extract_save_contents extract_save_contents
 
 		#--------------------------------------------------------------------------
-		# * CrÃ©e les objets du jeu
+		# * Crée les objets du jeu
 		#--------------------------------------------------------------------------
 		def create_game_objects
 			local_create_game_objects
