@@ -1004,8 +1004,8 @@ class Line
 			return 1 if x > @cx
 			return 0
 		end
-		return -1 if x < @a*y+@b
-		return 1 if x > @a*y+@b
+		return -1 if y > @a*x+@b
+    	return 1 if y < @a*x+@b
 		return 0
 	end
 end
