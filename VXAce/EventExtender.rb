@@ -77,7 +77,7 @@ module Database
 			@@tables
 		end
 	end
-
+	
 	#==============================================================================
 	# ** Table
 	#------------------------------------------------------------------------------
@@ -416,10 +416,74 @@ class Ellipse_Zone
   	# * vérifie si des coordonnées sont dans une zone
   	#--------------------------------------------------------------------------
   	def in_zone?(x, y)
-  		w = ((x.to_f-@x.to_f)**2.0))/(@width.to_f/2.0)
+  		w = ((x.to_f-@x.to_f)**2.0)/(@width.to_f/2.0)
 		h = ((y.to_f-@y.to_f)**2.0)/(@height.to_f/2.0)
 		w + h <= 1
   	end
+end
+
+
+#==============================================================================
+# ** Polygon_Zone
+#------------------------------------------------------------------------------
+#  Définition de zone polygonale
+#==============================================================================
+
+class Polygon_Zone
+	#--------------------------------------------------------------------------
+	# * Constructeur
+	#--------------------------------------------------------------------------
+	def initialize(points)
+		modify_coord(points)
+	end
+	#--------------------------------------------------------------------------
+	# * modifie les coordonnées
+	#--------------------------------------------------------------------------
+	def modify_coord(points)
+		@points = points
+		@last_x = @last_y = 0
+	end
+	#--------------------------------------------------------------------------
+	# * Mise a jours de la zone
+	#--------------------------------------------------------------------------
+	def update
+		new_x, new_y = $game_map.display_x * 32, $game_map.display_y * 32
+		x_plus, y_plus = @last_x - new_x, @last_y - new_y
+		@last_x, @last_y = new_x, new_y
+		@points.each do |point|
+			point[0] += x_plus
+			point[1] += y_plus
+		end
+	end
+	#--------------------------------------------------------------------------
+	# * Trouve  la fonction d'intersection de segments
+	#--------------------------------------------------------------------------
+	def intersectsegment(a_x, a_y, b_x, b_y, i_x, i_y, p_x, p_y)
+		d_x, d_y = b_x - a_x, b_y - a_y
+		e_x, e_y = p_x - i_x, p_y - i_y
+		denominateur = (d_x * e_y) - (d_y * e_x)
+		return -1 if denominateur == 0
+		t = (i_x*e_y+e_x*a_y-a_x*e_y-e_x*i_y) / denominateur
+		return 0 if t < 0 || t >= 1
+		u = (d_x*a_y-d_x*i_y-d_y*a_x+d_y*i_x) / denominateur
+		return 0 if u < 0 || u >= 1
+		return 1
+	end
+	#--------------------------------------------------------------------------
+	# * Vérifie si un point est dans la zone
+	#--------------------------------------------------------------------------
+	def in_zone?(p_x, p_y)
+		i_x, i_y = 10000 + rand(100), 10000 + rand(100)
+		nb_intersections = 0
+		@points.each_index do |index|
+			a_x, a_y = *@points[index]
+			b_x, b_y = *@points[(index + 1) % @points.length]
+			intersection = intersectsegment(a_x, a_y, b_x, b_y, i_x, i_y, p_x, p_y)
+			return in_zone?(p_x, p_y) if intersection == -1
+			nb_intersections += intersection
+		end
+		return (nb_intersections%2 == 1)
+	end
 end
 
 
@@ -433,9 +497,9 @@ module HWND
   #--------------------------------------------------------------------------
   # * Constantes
   #--------------------------------------------------------------------------
-  @@FindWindowA = Win32API.new('user32', 'FindWindowA', 'pp', 'l')
-  @@GetPrivateProfileStringA = Win32API.new('kernel32', 'GetPrivateProfileStringA', 'pppplp', 'l')
-  @@ShowCursor = Win32API.new('user32', 'ShowCursor', 'i', 'i')
+  FindWindowA = Win32API.new('user32', 'FindWindowA', 'pp', 'l')
+  GetPrivateProfileStringA = Win32API.new('kernel32', 'GetPrivateProfileStringA', 'pppplp', 'l')
+  ShowCursor = Win32API.new('user32', 'ShowCursor', 'i', 'i')
   #--------------------------------------------------------------------------
   # * Lie les méthodes a la classe
   #--------------------------------------------------------------------------
@@ -445,16 +509,16 @@ module HWND
   #--------------------------------------------------------------------------
   def get
     name = "\x00" * 256
-    @@GetPrivateProfileStringA.('Game', 'Title', '', name, 255, ".\\Game.ini")
+    GetPrivateProfileStringA.('Game', 'Title', '', name, 255, ".\\Game.ini")
     name.delete!("\x00")
-    return @@FindWindowA.('RGSS Player', name)
+    return FindWindowA.('RGSS Player', name)
   end
   #--------------------------------------------------------------------------
   # * Défini l'affichage du curseur
   #--------------------------------------------------------------------------
   def show_cursor(flag = true)
     value = flag ? 1 : 0
-    @@ShowCursor.(value)
+    ShowCursor.(value)
   end
 end
 
@@ -468,8 +532,8 @@ module Mouse
   #--------------------------------------------------------------------------
   # * Constantes
   #--------------------------------------------------------------------------
-  @@GetCursorPos = Win32API.new('user32', 'GetCursorPos', 'p', 'i')
-  @@ScreenToClient = Win32API.new('user32', 'ScreenToClient', %w(l p), 'i')
+  GetCursorPos = Win32API.new('user32', 'GetCursorPos', 'p', 'i')
+  ScreenToClient = Win32API.new('user32', 'ScreenToClient', %w(l p), 'i')
   #--------------------------------------------------------------------------
   # * Lie les méthodes a la classe
   #--------------------------------------------------------------------------
@@ -480,10 +544,10 @@ module Mouse
   def position
     pos = [0, 0].pack('ll')
     p_value = nil
-    p_value = pos.unpack('ll') unless @@GetCursorPos.(pos) == 0
+    p_value = pos.unpack('ll') unless GetCursorPos.(pos) == 0
     pos = [p_value[0], p_value[1]].pack('ll')
     p_value = nil
-    p_value = pos.unpack('ll') if @@ScreenToClient.(HWND.get, pos)
+    p_value = pos.unpack('ll') if ScreenToClient.(HWND.get, pos)
     x, y = p_value
     return {x: x, y: y}
   end
@@ -499,20 +563,20 @@ module Key
 	#--------------------------------------------------------------------------
   	# * Constantes
   	#--------------------------------------------------------------------------
-	@@GetKeyState = Win32API.new('user32', 'GetKeyState', 'i', 'i')
-	@@GetAsyncKeyState = Win32API.new('user32', 'GetAsyncKeyState', 'i', 'i')
+	GetKeyState = Win32API.new('user32', 'GetKeyState', 'i', 'i')
+	GetAsyncKeyState = Win32API.new('user32', 'GetAsyncKeyState', 'i', 'i')
 	class << self
 		#--------------------------------------------------------------------------
 		# * Vérifie si il click il y a (pour Souris)
 		#--------------------------------------------------------------------------
 		def click?(key)
-			return @@GetKeyState.(key) > 1
+			return GetKeyState.(key) > 1
 		end
 		#--------------------------------------------------------------------------
 		# * Vérifie si une touche est pressée
 		#--------------------------------------------------------------------------
 		def press?(key)
-			@@GetAsyncKeyState.(key) & 0x01 == 1
+			GetAsyncKeyState.(key) & 0x01 == 1
 		end
 	end
 	#--------------------------------------------------------------------------
@@ -637,14 +701,14 @@ module Socket
 	#--------------------------------------------------------------------------
 	# * Win32API
 	#--------------------------------------------------------------------------
-	@@Socket = Win32API.new('ws2_32', 'socket', 'lll', 'l')
-	@@Connect = Win32API.new('ws2_32', 'connect', 'ppl', 'l')
-	@@Close = Win32API.new('ws2_32', 'closesocket', 'p', 'l')
-	@@Send = Win32API.new('ws2_32', 'send', 'ppll', 'l')
-	@@Recv = Win32API.new('ws2_32', 'recv', 'ppll', 'l')
-	@@Inet_addr = Win32API.new('ws2_32', 'inet_addr', 'p', 'l')
-	@@Htons = Win32API.new('ws2_32', 'htons', 'l', 'l')
-	@@Shutdown = Win32API.new('ws2_32', 'shutdown', 'pl', 'l')
+	Socket = Win32API.new('ws2_32', 'socket', 'lll', 'l')
+	Connect = Win32API.new('ws2_32', 'connect', 'ppl', 'l')
+	Close = Win32API.new('ws2_32', 'closesocket', 'p', 'l')
+	Send = Win32API.new('ws2_32', 'send', 'ppll', 'l')
+	Recv = Win32API.new('ws2_32', 'recv', 'ppll', 'l')
+	Inet_addr = Win32API.new('ws2_32', 'inet_addr', 'p', 'l')
+	Htons = Win32API.new('ws2_32', 'htons', 'l', 'l')
+	Shutdown = Win32API.new('ws2_32', 'shutdown', 'pl', 'l')
 	#--------------------------------------------------------------------------
 	# * Constantes
 	#--------------------------------------------------------------------------
@@ -659,8 +723,8 @@ module Socket
 		#--------------------------------------------------------------------------
 		def sockaddr_in(host, port)
 			sin_family = AF_INET
-			sin_port = @@Htons.(port)
-			in_addr = @@Inet_addr.(host)
+			sin_port = Htons.(port)
+			in_addr = Inet_addr.(host)
 			sockaddr_in = [sin_family, sin_port, in_addr].pack('sSLx8')
 			return sockaddr_in
 		end
@@ -668,13 +732,13 @@ module Socket
 		# * Création du Socket
 		#--------------------------------------------------------------------------
 		def socket()
-			return @@Socket.(AF_INET, SOCK_STREAM, 0)
+			return Socket.(AF_INET, SOCK_STREAM, 0)
 		end
 		#--------------------------------------------------------------------------
 		# * Connexion
 		#--------------------------------------------------------------------------
 		def connect_sock(sock, sockaddr)
-			if @@Connect.(sock, sockaddr, sockaddr.size) == -1
+			if Connect.(sock, sockaddr, sockaddr.size) == -1
 				p "Impossible de se connecter"
 				return
 			end
@@ -693,7 +757,7 @@ module Socket
 		# * Envoi d'une donnée
 		#--------------------------------------------------------------------------
 		def send(socket, data)
-			value = @@Send.(socket, data, data.length, 0)
+			value = Send.(socket, data, data.length, 0)
 			if value == -1
 				p "Envoi échoué"
 				shutdown(socket, 2)
@@ -707,7 +771,7 @@ module Socket
 		#--------------------------------------------------------------------------
 		def recv(socket, len = 256)
 			buffer = [].pack('x'+len.to_s)
-			value = @@Recv.(socket, buffer, len, 0)
+			value = Recv.(socket, buffer, len, 0)
 			return buffer.gsub(/\x00/, "") if value != -1
 			return false
 		end
@@ -715,13 +779,13 @@ module Socket
 		# * Supprime l'émission
 		#--------------------------------------------------------------------------
 		def shutdown(socket, how)
-			@@Shutdown.(socket, how)
+			Shutdown.(socket, how)
 		end
 		#--------------------------------------------------------------------------
 		# * Ferme la connection
 		#--------------------------------------------------------------------------
 		def close(socket)
-			@@Close.(socket)
+			Close.(socket)
 		end
 	end
 end
@@ -1090,9 +1154,11 @@ module Command
 			x, y, r = args[1], args[2], args[3]
 			return Circle_Zone.new(x, y, r)
 
-		else
+		elsif symbol == :Ellipse
 			x1, y1, w, h = args[1], args[2], args[3], args[4]
 			return Ellipse_Zone.new(x1, y1, w, h)
+		else 
+			return Polygon_Zone.new(args[1])
 		end
 	end
 	#--------------------------------------------------------------------------
