@@ -380,9 +380,48 @@ class Circle_Zone
   	# * vérifie si des coordonnées sont dans une zone
   	#--------------------------------------------------------------------------
   	def in_zone?(x, y)
-  		((x-@x)**2) + ((y-@y)**2) > (@r**2)
+  		((x-@x)**2) + ((y-@y)**2) <= (@r**2)
   	end
 end
+
+
+#==============================================================================
+# ** Ellipse_Zone
+#------------------------------------------------------------------------------
+#  Définition de zone elliptique
+#==============================================================================
+
+class Ellipse_Zone
+	#--------------------------------------------------------------------------
+  	# * Constructeur
+  	#--------------------------------------------------------------------------
+  	def initialize(x, y, width, height)
+  		modify_coord(x, y, width, height)
+  	end
+  	#--------------------------------------------------------------------------
+  	# * modifie les coordonnées
+  	#--------------------------------------------------------------------------
+  	def modify_coord(x, y, width, height)
+  		@x, @y, @width, @height = x, y, width, height 
+  		@raw_x, @raw_y = @x, @y
+  	end
+  	#--------------------------------------------------------------------------
+  	# * Met a jours la zone
+  	#--------------------------------------------------------------------------
+  	def update
+  		@x = @raw_x - ($game_map.display_x * 32)
+  		@y = @raw_y - ($game_map.display_y * 32)
+  	end
+  	#--------------------------------------------------------------------------
+  	# * vérifie si des coordonnées sont dans une zone
+  	#--------------------------------------------------------------------------
+  	def in_zone?(x, y)
+  		w = ((x.to_f-@x.to_f)**2.0))/(@width.to_f/2.0)
+		h = ((y.to_f-@y.to_f)**2.0)/(@height.to_f/2.0)
+		w + h <= 1
+  	end
+end
+
 
 #==============================================================================
 # ** HWND
@@ -1047,9 +1086,13 @@ module Command
 		if symbol == :rectangle || symbol == :rect
 			x1, y1, x2, y2 = args[1], args[2], args[3], args[4]
 			return Rect_Zone.new(x1, x2, y1, y2)
-		else
+		elsif symbol == :circle
 			x, y, r = args[1], args[2], args[3]
 			return Circle_Zone.new(x, y, r)
+
+		else
+			x1, y1, w, h = args[1], args[2], args[3], args[4]
+			return Ellipse_Zone.new(x1, y1, w, h)
 		end
 	end
 	#--------------------------------------------------------------------------
