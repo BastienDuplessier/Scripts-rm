@@ -622,3 +622,119 @@ class Game_Interpreter
 	end
 
 end
+#==============================================================================
+# ** Command
+#------------------------------------------------------------------------------
+#  Ajoute des commandes facilement manipulables (Event Extender)
+#==============================================================================
+
+module Command
+	#--------------------------------------------------------------------------
+	# * Singleton de Command
+	#--------------------------------------------------------------------------
+	extend self
+	#--------------------------------------------------------------------------
+	# * Crée un groupe
+	# id = identifiant du groupe
+	# lose = Distance max avant qu'un event soit perdu
+	# decal = Le décalage positionnel des membres
+	# leader = Id du leader
+	# *members = liste des membres
+	#--------------------------------------------------------------------------
+	def create_group(id, lose, decal, type, leader, *members)
+		$game_map.add_group(id, lose, decal, type, leader, *members)
+	end
+	#--------------------------------------------------------------------------
+	# * Crée un groupe simplement avec des paramètres par défaut
+	# id = identifiant du groupe
+	# leader = Id du leader
+	# *members = liste des membres
+	#--------------------------------------------------------------------------
+	def create_simple_group(id, leader, *members)
+		$game_map.add_group(id, Config_Consolidator::DEFAULT_LOST_ZONE, Config_Consolidator::DEFAULT_DECAL,:normal, leader, *members)
+	end
+	#--------------------------------------------------------------------------
+	# * Recupère un groupe (pour lui appliquer des transformations)
+	#--------------------------------------------------------------------------
+	def get_group(id)
+		return $game_map.group(id)
+	end
+	#--------------------------------------------------------------------------
+	# * Défini le type de regroupement d'un groupe
+	#--------------------------------------------------------------------------
+	def set_group_type(id, type)
+		get_group(id).type = type
+	end
+	#--------------------------------------------------------------------------
+	# * Défini le décalage d'un groupe
+	#--------------------------------------------------------------------------
+	def set_group_decal(id, value)
+		get_group(id).decal = value
+	end
+	#--------------------------------------------------------------------------
+	# * Récupère le décalage du groupe
+	#--------------------------------------------------------------------------
+	def get_group_decal(id)
+		get_group(id).decal
+	end
+	#--------------------------------------------------------------------------
+	# * Défini la zone de perdition d'un groupe
+	#--------------------------------------------------------------------------
+	def set_group_lost_distance(id, value)
+		get_group(id).lost_distance = value
+	end
+	#--------------------------------------------------------------------------
+	# * Ajoute des membres
+	#--------------------------------------------------------------------------
+	def add_to_group(id, *members)
+		get_group(id).add(*members)
+	end
+	#--------------------------------------------------------------------------
+	# * Supprime des membres
+	#--------------------------------------------------------------------------
+	def remove_to_group(id, *members)
+		get_group(id).remove(*members)
+	end
+	#--------------------------------------------------------------------------
+	# * Vérifie l'existence d'un membre
+	#--------------------------------------------------------------------------
+	def member_in_group?(id, id_m)
+		get_group(id).member_exists?(id_m)
+	end
+	#--------------------------------------------------------------------------
+	# * Vérifie si le groupe est comple
+	#--------------------------------------------------------------------------
+	def group_complete?(id)
+		get_group(id).complete?
+	end
+	#--------------------------------------------------------------------------
+	# * Compte les membres en dehors de la zone
+	#--------------------------------------------------------------------------
+	def group_miss_people(id)
+		get_group(id).miss_people
+	end
+	#--------------------------------------------------------------------------
+	# * Vide un groupe
+	#--------------------------------------------------------------------------
+	def group_clear(id)
+		get_group(id).clear
+	end
+	#--------------------------------------------------------------------------
+	# * Supprime un groupe
+	#--------------------------------------------------------------------------
+	def group_delete(id)
+		get_group(id).delete
+	end
+	#--------------------------------------------------------------------------
+	# * Vérifie si un membre est perdu
+	#--------------------------------------------------------------------------
+	def missed_to_group?(id, id_m)
+		get_group(id).missed?(id_m)
+	end
+	#--------------------------------------------------------------------------
+	# * Active / Désactive la course du groupe
+	#--------------------------------------------------------------------------
+	def activate_group_dash(id, value=true)
+		get_group(id).dash = value
+	end
+end
