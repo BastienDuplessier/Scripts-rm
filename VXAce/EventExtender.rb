@@ -4,7 +4,7 @@
 
 # Remerciements
 # ------------------------------------------------------
-# Nuki, Molok, Zangther, Joke (maaath), Magicalichigo, Teraglehn
+# Nuki, Molok, Zangther, Joke (maaath), Magicalichigo, Teraglehn, Hiino (pour des vérifs, traduction)
 # Lidenvice, Al Rind, Avygeil (pour l'inspiration et pour son explication sur pack), 
 # S4suk3, brandobscure (lol), Zeus81 (Pack, GetKeyState, Union etc ...)
 # ------------------------------------------------------
