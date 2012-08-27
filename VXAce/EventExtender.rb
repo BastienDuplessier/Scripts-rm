@@ -1,6 +1,6 @@
 # Variables locales et commandes alternatives version 1.1
 # Par Grim BILOUCORP - FUNKYWORK
-# Avec des composantes de Nuki (et sur base d'une de ses idées)
+# Avec des composantes de Nuki (et sur base d'une de ses idÃ©es)
 
 # Remerciements
 # ------------------------------------------------------
@@ -10,15 +10,15 @@
 # ------------------------------------------------------
 # http://www.biloucorp.com http://funkywork.blogspot.com
 
-# Crédit
+# CrÃ©dit
 # ------------------------------------------------------
 # :D rien 
 
 #==============================================================================
 # ** Module database
 #------------------------------------------------------------------------------
-#  Ce module permet la création d'une base de données personnalisée
-#  Elle peut s'utiliser dans des systèmes 100% originaux.
+#  Ce module permet la crÃ©ation d'une base de donnÃ©es personnalisÃ©e
+#  Elle peut s'utiliser dans des systÃ¨mes 100% originaux.
 #  Requiert un bon niveau en Event making et quelques notions en Ruby 
 #  Ref : Documentation du script
 #==============================================================================
@@ -29,25 +29,25 @@ module Database
 	#--------------------------------------------------------------------------
 	@@tables = []
 	#--------------------------------------------------------------------------
-	# * Méthodes propre à Database
+	# * MÃ©thodes propre Ã  Database
 	#--------------------------------------------------------------------------
 	class << self
 
 		#--------------------------------------------------------------------------
-		# * Mapping de la base de données
+		# * Mapping de la base de donnÃ©es
 		#--------------------------------------------------------------------------
 		def mapping
 			#--------------------------------------------------------------------------
 			# * Instructions
-			# C'est dans cette partie que vous allez pouvoir créer toutes les tables
+			# C'est dans cette partie que vous allez pouvoir crÃ©er toutes les tables
 			#--------------------------------------------------------------------------
-			# Créer une table : create_table("nom de la table", champ1: :type, champ2: :type, etc)
+			# CrÃ©er une table : create_table("nom de la table", champ1: :type, champ2: :type, etc)
 			# Liste des types disponnibles = :integer, :float, :bool, :string
 			create_table("Essai", id: :int, name: :string, some_bool: :bool)
 
 		end
 		#--------------------------------------------------------------------------
-		# * Remplis la base de données de données :D
+		# * Remplis la base de donnÃ©es de donnÃ©es :D
 		#--------------------------------------------------------------------------
 		def fill_tables
 			# Remplissage de la table Essai
@@ -55,13 +55,13 @@ module Database
 			table("Essai")  << 	[0, "Uun nom", false]
 		end
 		#--------------------------------------------------------------------------
-		# * Crée une table
+		# * CrÃ©e une table
 		#--------------------------------------------------------------------------
 		def create_table(name, hash)
 			@@tables << Table.new(name, hash)
 		end
 		#--------------------------------------------------------------------------
-		# * Récupère une table
+		# * RÃ©cupÃ¨re une table
 		#--------------------------------------------------------------------------
 		def table(name)
 			@@tables.find do |tbl|
@@ -81,7 +81,7 @@ module Database
 	#==============================================================================
 	# ** Table
 	#------------------------------------------------------------------------------
-	#  Décri une table de la base de données
+	#  DÃ©cri une table de la base de donnÃ©es
 	#==============================================================================
 
 	class Table
@@ -105,7 +105,7 @@ module Database
 			@size = 0
 		end
 		#--------------------------------------------------------------------------
-		# * convertit dans le type adéquat
+		# * convertit dans le type adÃ©quat
 		#--------------------------------------------------------------------------
 		def cast(value, type)
 			type = type.to_sym
@@ -137,19 +137,19 @@ module Database
 			add_row(*fields)
 		end
 		#--------------------------------------------------------------------------
-		# * Cherche une donnée
+		# * Cherche une donnÃ©e
 		#--------------------------------------------------------------------------
 		def find(&block)
 			@rows.find(&block)
 		end
 		#--------------------------------------------------------------------------
-		# * Cherche une collection de données
+		# * Cherche une collection de donnÃ©es
 		#--------------------------------------------------------------------------
 		def select(&block)
 			@rows.select(&block)
 		end
 		#--------------------------------------------------------------------------
-		# * Compte le nombre de données en fonction d'un prédicat
+		# * Compte le nombre de donnÃ©es en fonction d'un prÃ©dicat
 		#--------------------------------------------------------------------------
 		def count(&block)
 			@rows.count(&block)
@@ -175,7 +175,7 @@ class Simple_Matrix
 		@table = []
 	end
 	#--------------------------------------------------------------------------
-	# * Récupère une valeur
+	# * RÃ©cupÃ¨re une valeur
 	#--------------------------------------------------------------------------
 	def [](*keys)
 		table, f_key = @table, keys.pop
@@ -253,7 +253,7 @@ end
 
 class Numeric
 	#--------------------------------------------------------------------------
-	# * Unitées du nombre
+	# * UnitÃ©es du nombre
 	#--------------------------------------------------------------------------
 	def unites
 		return self % 10
@@ -312,7 +312,7 @@ end
 #==============================================================================
 # ** Rect_Zone
 #------------------------------------------------------------------------------
-#  Définition de zone rectangulaire
+#  DÃ©finition de zone rectangulaire
 #==============================================================================
 
 class Rect_Zone
@@ -323,7 +323,7 @@ class Rect_Zone
   		modify_coord(x1, y1, x2, y2)
   	end
   	#--------------------------------------------------------------------------
-  	# * modifie les coordonnées
+  	# * modifie les coordonnÃ©es
   	#--------------------------------------------------------------------------
   	def modify_coord(x1, x2, y1, y2)
   		@x1, @x2 = x1,x2
@@ -333,7 +333,7 @@ class Rect_Zone
   		@raw_x1, @raw_y1, @raw_x2, @raw_y2 = @x1, @y1, @x2, @y2
   	end
   	#--------------------------------------------------------------------------
-  	# * vérifie si des coordonnées sont dans une zone
+  	# * vÃ©rifie si des coordonnÃ©es sont dans une zone
   	#--------------------------------------------------------------------------
   	def in_zone?(x, y)
   		x >= @x1 && x <= @x2 && y >= @y1 && y <= @y2
@@ -352,7 +352,7 @@ end
 #==============================================================================
 # ** Circle_Zone
 #------------------------------------------------------------------------------
-#  Définition de zone circulaire
+#  DÃ©finition de zone circulaire
 #==============================================================================
 
 class Circle_Zone
@@ -363,7 +363,7 @@ class Circle_Zone
   		modify_coord(x, y, r)
   	end
   	#--------------------------------------------------------------------------
-  	# * modifie les coordonnées
+  	# * modifie les coordonnÃ©es
   	#--------------------------------------------------------------------------
   	def modify_coord(x, y, r)
   		@x, @y, @r = x, y, r 
@@ -377,7 +377,7 @@ class Circle_Zone
   		@y = @raw_y - ($game_map.display_y * 32)
   	end
   	#--------------------------------------------------------------------------
-  	# * vérifie si des coordonnées sont dans une zone
+  	# * vÃ©rifie si des coordonnÃ©es sont dans une zone
   	#--------------------------------------------------------------------------
   	def in_zone?(x, y)
   		((x-@x)**2) + ((y-@y)**2) <= (@r**2)
@@ -388,7 +388,7 @@ end
 #==============================================================================
 # ** Ellipse_Zone
 #------------------------------------------------------------------------------
-#  Définition de zone elliptique
+#  DÃ©finition de zone elliptique
 #==============================================================================
 
 class Ellipse_Zone
@@ -399,7 +399,7 @@ class Ellipse_Zone
   		modify_coord(x, y, width, height)
   	end
   	#--------------------------------------------------------------------------
-  	# * modifie les coordonnées
+  	# * modifie les coordonnÃ©es
   	#--------------------------------------------------------------------------
   	def modify_coord(x, y, width, height)
   		@x, @y, @width, @height = x, y, width, height 
@@ -413,7 +413,7 @@ class Ellipse_Zone
   		@y = @raw_y - ($game_map.display_y * 32)
   	end
   	#--------------------------------------------------------------------------
-  	# * vérifie si des coordonnées sont dans une zone
+  	# * vÃ©rifie si des coordonnÃ©es sont dans une zone
   	#--------------------------------------------------------------------------
   	def in_zone?(x, y)
   		w = ((x.to_f-@x.to_f)**2.0)/(@width.to_f/2.0)
@@ -426,7 +426,7 @@ end
 #==============================================================================
 # ** Polygon_Zone
 #------------------------------------------------------------------------------
-#  Définition de zone polygonale
+#  DÃ©finition de zone polygonale
 #==============================================================================
 
 class Polygon_Zone
@@ -437,7 +437,7 @@ class Polygon_Zone
 		modify_coord(points)
 	end
 	#--------------------------------------------------------------------------
-	# * modifie les coordonnées
+	# * modifie les coordonnÃ©es
 	#--------------------------------------------------------------------------
 	def modify_coord(points)
 		@points = points
@@ -470,7 +470,7 @@ class Polygon_Zone
 		return 1
 	end
 	#--------------------------------------------------------------------------
-	# * Vérifie si un point est dans la zone
+	# * VÃ©rifie si un point est dans la zone
 	#--------------------------------------------------------------------------
 	def in_zone?(p_x, p_y)
 		i_x, i_y = 10000 + rand(100), 10000 + rand(100)
@@ -490,7 +490,7 @@ end
 #==============================================================================
 # ** HWND
 #------------------------------------------------------------------------------
-#  Librairie de manipulation de fenêtres
+#  Librairie de manipulation de fenÃªtres
 #==============================================================================
 
 module HWND
@@ -501,7 +501,7 @@ module HWND
   GetPrivateProfileStringA = Win32API.new('kernel32', 'GetPrivateProfileStringA', 'pppplp', 'l')
   ShowCursor = Win32API.new('user32', 'ShowCursor', 'i', 'i')
   #--------------------------------------------------------------------------
-  # * Lie les méthodes a la classe
+  # * Lie les mÃ©thodes a la classe
   #--------------------------------------------------------------------------
   extend self
   #--------------------------------------------------------------------------
@@ -514,7 +514,7 @@ module HWND
     return FindWindowA.('RGSS Player', name)
   end
   #--------------------------------------------------------------------------
-  # * Défini l'affichage du curseur
+  # * DÃ©fini l'affichage du curseur
   #--------------------------------------------------------------------------
   def show_cursor(flag = true)
     value = flag ? 1 : 0
@@ -525,7 +525,7 @@ end
 #==============================================================================
 # ** Mouse
 #------------------------------------------------------------------------------
-#  Librairie de fonctionnalités pour la souris
+#  Librairie de fonctionnalitÃ©s pour la souris
 #==============================================================================
 
 module Mouse
@@ -535,7 +535,7 @@ module Mouse
   GetCursorPos = Win32API.new('user32', 'GetCursorPos', 'p', 'i')
   ScreenToClient = Win32API.new('user32', 'ScreenToClient', %w(l p), 'i')
   #--------------------------------------------------------------------------
-  # * Lie les méthodes a la classe
+  # * Lie les mÃ©thodes a la classe
   #--------------------------------------------------------------------------
   extend self
   #--------------------------------------------------------------------------
@@ -565,15 +565,18 @@ module Key
   	#--------------------------------------------------------------------------
 	GetKeyState = Win32API.new('user32', 'GetKeyState', 'i', 'i')
 	GetAsyncKeyState = Win32API.new('user32', 'GetAsyncKeyState', 'i', 'i')
+	GetAsyncKeyState = Win32API.new('user32', 'GetAsyncKeyState', 'i', 'i')
+	SetKeyboardState = Win32API.new("user32","SetKeyboardState",'p','i')
+	GetKeyboardState = Win32API.new("user32","GetKeyboardState", 'p','i')
 	class << self
 		#--------------------------------------------------------------------------
-		# * Vérifie si il click il y a (pour Souris)
+		# * VÃ©rifie si il click il y a (pour Souris)
 		#--------------------------------------------------------------------------
 		def click?(key)
 			return GetKeyState.(key) > 1
 		end
 		#--------------------------------------------------------------------------
-		# * Vérifie si une touche est pressée
+		# * VÃ©rifie si une touche est pressÃ©e
 		#--------------------------------------------------------------------------
 		def press?(key)
 			GetAsyncKeyState.(key) & 0x01 == 1
@@ -607,7 +610,7 @@ module Key
 	PRINT		= 0x2A
 	EXECUTE		= 0x2B
 	HELP		= 0x2F
-	#Touches numériques
+	#Touches numÃ©riques
 	ZERO		= 0x30
 	ONE 		= 0x31
 	TWO			= 0x32
@@ -679,7 +682,7 @@ module Key
 	F10			= 0x79
 	F11			= 0x7A
 	F12			= 0x7B
-	#Touches de contrôles
+	#Touches de contrÃ´les
 	NUM_LOCK	= 0x90
 	SCROLL		= 0x91
 	LSHIFT		= 0xA0
@@ -693,8 +696,8 @@ end
 #==============================================================================
 # ** Socket
 #------------------------------------------------------------------------------
-#  Ajoute la possibilité d'envoyer/recevoir des messages à un serveur
-#  Un tout grand merci à Zeus81 (et un peu à Nuki tout de même)
+#  Ajoute la possibilitÃ© d'envoyer/recevoir des messages Ã  un serveur
+#  Un tout grand merci Ã  Zeus81 (et un peu Ã  Nuki tout de mÃªme)
 #==============================================================================
 
 module Socket
@@ -719,7 +722,7 @@ module Socket
 	#--------------------------------------------------------------------------
 	class << self
 		#--------------------------------------------------------------------------
-		# * Création du SOCKADDR_IN
+		# * CrÃ©ation du SOCKADDR_IN
 		#--------------------------------------------------------------------------
 		def sockaddr_in(host, port)
 			sin_family = AF_INET
@@ -729,11 +732,9 @@ module Socket
 			return sockaddr_in
 		end
 		#--------------------------------------------------------------------------
-		# * Création du Socket
+		# * CrÃ©ation du Socket
 		#--------------------------------------------------------------------------
-		def socket()
-			return Socket.(AF_INET, SOCK_STREAM, 0)
-		end
+		def socket() return Socket.(AF_INET, SOCK_STREAM, 0) end
 		#--------------------------------------------------------------------------
 		# * Connexion
 		#--------------------------------------------------------------------------
@@ -742,7 +743,7 @@ module Socket
 				p "Impossible de se connecter"
 				return
 			end
-			p "Connexion réussie"
+			p "Connexion rÃ©ussie"
 		end
 		#--------------------------------------------------------------------------
 		# * Connexion
@@ -754,20 +755,20 @@ module Socket
 			return sock
 		end
 		#--------------------------------------------------------------------------
-		# * Envoi d'une donnée
+		# * Envoi d'une donnÃ©e
 		#--------------------------------------------------------------------------
 		def send(socket, data)
 			value = Send.(socket, data, data.length, 0)
 			if value == -1
-				p "Envoi échoué"
+				p "Envoi Ã©chouÃ©"
 				shutdown(socket, 2)
 				return false
 			end
-			p "Envoi réussis"
+			p "Envoi rÃ©ussis"
 			return true
 		end
 		#--------------------------------------------------------------------------
-		# * Réceptions de données
+		# * RÃ©ceptions de donnÃ©es
 		#--------------------------------------------------------------------------
 		def recv(socket, len = 256)
 			buffer = [].pack('x'+len.to_s)
@@ -776,17 +777,13 @@ module Socket
 			return false
 		end
 		#--------------------------------------------------------------------------
-		# * Supprime l'émission
+		# * Supprime l'Ã©mission
 		#--------------------------------------------------------------------------
-		def shutdown(socket, how)
-			Shutdown.(socket, how)
-		end
+		def shutdown(socket, how) Shutdown.(socket, how) end
 		#--------------------------------------------------------------------------
 		# * Ferme la connection
 		#--------------------------------------------------------------------------
-		def close(socket)
-			Close.(socket)
-		end
+		def close(socket) Close.(socket) end
 	end
 end
 
@@ -840,20 +837,20 @@ class Game_Map
     @fix_pictures = []
   end
   #--------------------------------------------------------------------------
-  # * Définis les images fixée
+  # * DÃ©finis les images fixÃ©e
   #--------------------------------------------------------------------------
   def set_fixed_pictures(ids)
     @fix_pictures = ids
   end
   #--------------------------------------------------------------------------
-  # * Ajoute une image qui reste malgré le téléport
+  # * Ajoute une image qui reste malgrÃ© le tÃ©lÃ©port
   #--------------------------------------------------------------------------
   def add_stay_pictures(ids)
     @stay_pictures += ids
     @stay_pictures.uniq!
   end
   #--------------------------------------------------------------------------
-  # * Enlève une image qui reste malgré le téléport
+  # * EnlÃ¨ve une image qui reste malgrÃ© le tÃ©lÃ©port
   #--------------------------------------------------------------------------
   def remove_stay_pictures(ids)
     ids.each do |id|
@@ -861,13 +858,13 @@ class Game_Map
     end
   end
   #--------------------------------------------------------------------------
-  # * Vérifie si une image est fixée
+  # * VÃ©rifie si une image est fixÃ©e
   #--------------------------------------------------------------------------
   def fixed?(id)
     @fix_pictures.include?(id)
   end
   #--------------------------------------------------------------------------
-  # * Vérifie si une image reste
+  # * VÃ©rifie si une image reste
   #--------------------------------------------------------------------------
   def stayed?(id)
     @stay_pictures.include?(id)
@@ -917,7 +914,7 @@ class Sprite_Picture
 end
 
 #==============================================================================
-# ** Picture
+# ** Picture 
 #------------------------------------------------------------------------------
 #  Utilitaire de manipulation de pictures
 #==============================================================================
@@ -925,13 +922,13 @@ end
 module Picture
 	extend self
 	#--------------------------------------------------------------------------
-	# * Donne l'écran
+	# * Donne l'Ã©cran
 	#--------------------------------------------------------------------------
 	def get_screen
 		$game_map.respond_to?(:screen) ? $game_map.screen : $game_screen
 	end
 	#--------------------------------------------------------------------------
-	# * Change l'opacité
+	# * Change l'opacitÃ©
 	#--------------------------------------------------------------------------
 	def change_opacity(id, value)
 		value %=256
@@ -964,7 +961,7 @@ end
 #==============================================================================
 # ** Line
 #------------------------------------------------------------------------------
-#  Défini une ligne
+#  DÃ©fini une ligne
 #==============================================================================
 
 class Line
@@ -977,11 +974,13 @@ class Line
 	#--------------------------------------------------------------------------
 	def initialize(x1,y1,x2,y2)
 		@sx, @sy, @cx, @cy = x1, y1, x2, y2
-		@a = (@sy-@cy)/(@sx-@cx).to_f
-		@b = (@sy - @sx*@a).to_f
+		if @sx != @cx
+			@a = (@sy-@cy)/(@sx-@cx).to_f
+			@b = (@sy - @sx*@a).to_f
+		end
 	end
 	#--------------------------------------------------------------------------
-	# * donne l'équation de droite
+	# * donne l'Ã©quation de droite
 	#--------------------------------------------------------------------------
 	def equation
 		return nil if @sx == @cx
@@ -989,14 +988,14 @@ class Line
   		return fun.curry.(@a, @b)
 	end
 	#--------------------------------------------------------------------------
-	# * Donne le Y pour un x donné
+	# * Donne le Y pour un x donnÃ©
 	#--------------------------------------------------------------------------
 	def [](x)
 		return nil if @cx == @sx
 		return (@a * x + @b)
 	end
 	#--------------------------------------------------------------------------
-	# * vérifie la position d'un point par rapport a une droite
+	# * vÃ©rifie la position d'un point par rapport a une droite
 	#--------------------------------------------------------------------------
 	def position(x, y)
 		if @sx == @cx
@@ -1022,7 +1021,7 @@ module Command
 	#--------------------------------------------------------------------------
 	extend self
 	#--------------------------------------------------------------------------
-	# * Opérandes standards
+	# * OpÃ©randes standards
 	#--------------------------------------------------------------------------
 	def random(x, y) (x + rand(y - x)) end
 	def map_id() $game_map.map_id end
@@ -1037,7 +1036,7 @@ module Command
 	#--------------------------------------------------------------------------
 	def line(sx, sy, cx, cy) Line.new(sx, sy, cx, cy) end
 	#--------------------------------------------------------------------------
-	# * Opérandes de partie
+	# * OpÃ©randes de partie
 	#--------------------------------------------------------------------------
 	def team_size() $game_party.members.size end
 	def gold() $game_party.gold end
@@ -1047,13 +1046,13 @@ module Command
 	def save_count() $game_system.save_count end
 	def battle_count() $game_system.battle_count end
 	#--------------------------------------------------------------------------
-	# * Opérandes d'objets
+	# * OpÃ©randes d'objets
 	#--------------------------------------------------------------------------
 	def item_count(id) $game_party.item_number($data_items[id]) end
 	def weapon_count(id) $game_party.item_number($data_weapons[id]) end
 	def armor_count(id) $game_party.item_number($data_armors[id]) end
 	#--------------------------------------------------------------------------
-	# * Opérandes d'acteurs
+	# * OpÃ©randes d'acteurs
 	#--------------------------------------------------------------------------
 	def actor(id) $game_actors[id] end
 	def level(id) $game_actors[id].level end
@@ -1069,30 +1068,30 @@ module Command
 	def agility(id) $game_actors[id].agi end
 	def luck(id) $game_actors[id].luk end
 	#--------------------------------------------------------------------------
-	# * Opérandes d'events
+	# * OpÃ©randes d'events
 	#--------------------------------------------------------------------------
 	def event_x(id) 
-		character = $game_player
+		character = gp
 		character = $game_map.events[id] unless id == 0
 		character.x
 	end
 	def event_y(id) 
-		character = $game_player
+		character = gp
 		character = $game_map.events[id] unless id == 0
 		character.y
 	end
 	def event_direction(id) 
-		character = $game_player
+		character = gp
 		character = $game_map.events[id] unless id == 0
 		character.direction
 	end
 	def event_screen_x(id) 
-		character = $game_player
+		character = gp
 		character = $game_map.events[id] unless id == 0
 		character.screen_x
 	end
 	def event_screen_y(id) 
-		character = $game_player
+		character = gp
 		character = $game_map.events[id] unless id == 0
 		character.screen_y
 	end
@@ -1102,24 +1101,24 @@ module Command
 	def heroes_screen_x() Command.event_screen_x(0) end
 	def heroes_screen_y() Command.event_screen_y(0) end
 	def distance_between_case(ev1, ev2)
-		event1 = (ev1 == 0) ? $game_player : $game_map.events[ev1]
-		event2 = (ev2 == 0) ? $game_player : $game_map.events[ev2]
+		event1 = (ev1 == 0) ? gp : $game_map.events[ev1]
+		event2 = (ev2 == 0) ? gp : $game_map.events[ev2]
 		Math.hypot((event1.x - event2.x), (event1.y-event2.y))
 	end
 	def distance_between_pixel(ev1, ev2)
-		event1 = (ev1 == 0) ? $game_player : $game_map.events[ev1]
-		event2 = (ev2 == 0) ? $game_player : $game_map.events[ev2]
+		event1 = (ev1 == 0) ? gp : $game_map.events[ev1]
+		event2 = (ev2 == 0) ? gp : $game_map.events[ev2]
 		Math.hypot((event1.screen_x - event2.screen_x), (event1.screen_y-event2.screen_y))
 	end
 	#--------------------------------------------------------------------------
-	# * Opérandes de partie
+	# * OpÃ©randes de partie
 	#--------------------------------------------------------------------------
 	def actor_id(position) 
 		$game_party.members[position]
 		return actor ? actor.id : 0
 	end
 	#--------------------------------------------------------------------------
-	# * Commande de lecture de la base de données
+	# * Commande de lecture de la base de donnÃ©es
 	#--------------------------------------------------------------------------
 	def read_data_monster(id, method = false)
 		monster = $data_enemies[id]
@@ -1187,7 +1186,7 @@ module Command
 	def key_press?(key) Key.press?(key) end
 	def erase_cursor() HWND.show_cursor(false) end
 	#--------------------------------------------------------------------------
-	# * Manipulation de la base de données alternative
+	# * Manipulation de la base de donnÃ©es alternative
 	#--------------------------------------------------------------------------
 	def table(name)
 		$game_system.database.find do |elt|
@@ -1215,7 +1214,7 @@ end
 
 class Game_Interpreter
 	#--------------------------------------------------------------------------
-	# * Récupération d'une variable local
+	# * RÃ©cupÃ©ration d'une variable local
 	#--------------------------------------------------------------------------
 	def get(*arguments)
 		result = 0
@@ -1250,7 +1249,7 @@ class Game_Interpreter
 	#--------------------------------------------------------------------------
 	def variable(id, value) $game_variables[id] = value end
 	#--------------------------------------------------------------------------
-	# * API de récupérations des monstres/acteurs/techniques/tables
+	# * API de rÃ©cupÃ©rations des monstres/acteurs/techniques/tables
 	#--------------------------------------------------------------------------
 	def ennemy(id) cmd(:read_data_monster, id) end
 	def actor(id) cmd(:actor, id) end
@@ -1298,7 +1297,7 @@ module DataManager
 		alias local_make_save_contents make_save_contents
 		alias local_extract_save_contents extract_save_contents
 		#--------------------------------------------------------------------------
-		# * Crée les objets du jeu
+		# * CrÃ©e les objets du jeu
 		#--------------------------------------------------------------------------
 		def create_game_objects
 			local_create_game_objects
@@ -1325,7 +1324,7 @@ end
 #==============================================================================
 # ** Kernel
 #------------------------------------------------------------------------------
-#  Ajoute la fonction "cmd" pour être utlisable en scriptant
+#  Ajoute la fonction "cmd" pour Ãªtre utlisable en scriptant
 #==============================================================================
 
 module Kernel
