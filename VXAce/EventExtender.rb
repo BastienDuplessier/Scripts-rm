@@ -1071,27 +1071,27 @@ module Command
 	# * Opérandes d'events
 	#--------------------------------------------------------------------------
 	def event_x(id) 
-		character = gp
+		character = $game_player
 		character = $game_map.events[id] unless id == 0
 		character.x
 	end
 	def event_y(id) 
-		character = gp
+		character = $game_player
 		character = $game_map.events[id] unless id == 0
 		character.y
 	end
 	def event_direction(id) 
-		character = gp
+		character = $game_player
 		character = $game_map.events[id] unless id == 0
 		character.direction
 	end
 	def event_screen_x(id) 
-		character = gp
+		character = $game_player
 		character = $game_map.events[id] unless id == 0
 		character.screen_x
 	end
 	def event_screen_y(id) 
-		character = gp
+		character = $game_player
 		character = $game_map.events[id] unless id == 0
 		character.screen_y
 	end
@@ -1101,13 +1101,13 @@ module Command
 	def heroes_screen_x() Command.event_screen_x(0) end
 	def heroes_screen_y() Command.event_screen_y(0) end
 	def distance_between_case(ev1, ev2)
-		event1 = (ev1 == 0) ? gp : $game_map.events[ev1]
-		event2 = (ev2 == 0) ? gp : $game_map.events[ev2]
+		event1 = (ev1 == 0) ? $game_player : $game_map.events[ev1]
+		event2 = (ev2 == 0) ? $game_player : $game_map.events[ev2]
 		Math.hypot((event1.x - event2.x), (event1.y-event2.y))
 	end
 	def distance_between_pixel(ev1, ev2)
-		event1 = (ev1 == 0) ? gp : $game_map.events[ev1]
-		event2 = (ev2 == 0) ? gp : $game_map.events[ev2]
+		event1 = (ev1 == 0) ? $game_player : $game_map.events[ev1]
+		event2 = (ev2 == 0) ? $game_player : $game_map.events[ev2]
 		Math.hypot((event1.screen_x - event2.screen_x), (event1.screen_y-event2.screen_y))
 	end
 	#--------------------------------------------------------------------------
