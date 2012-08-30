@@ -1255,6 +1255,7 @@ class Game_Interpreter
       when 4; $game_selfVars[arguments[0], arguments[1], arguments[2]] = arguments[3]
       end
    end
+   alias let set
    #--------------------------------------------------------------------------
    # * API for command handling
    #--------------------------------------------------------------------------
