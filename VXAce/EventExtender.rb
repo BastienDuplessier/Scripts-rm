@@ -1209,7 +1209,7 @@ module Command
    # * Alternative database handling
    #--------------------------------------------------------------------------
    def table(name)
-      $game_system.database.find do |elt|
+      $game_database.find do |elt|
          elt.name == name
       end
    end
@@ -1279,31 +1279,6 @@ class Game_Interpreter
 end
 
 #==============================================================================
-# ** Game_System
-#------------------------------------------------------------------------------
-# This class handles system data. It saves the disable state of saving and
-# menus. Instances of this class are referenced by $game_system.
-#==============================================================================
-
-class Game_System
-   #--------------------------------------------------------------------------
-   # * Instance variables
-   #--------------------------------------------------------------------------
-   attr_reader :database
-   #--------------------------------------------------------------------------
-   # * Alias
-   #--------------------------------------------------------------------------
-   alias local_initialize initialize
-   #--------------------------------------------------------------------------
-   # * Constructor
-   #--------------------------------------------------------------------------
-   def initialize
-      local_initialize
-      @database = Database.finalize
-   end
-end
-
-#==============================================================================
 # ** DataManager
 #------------------------------------------------------------------------------
 # Lcal variables
@@ -1323,6 +1298,7 @@ module DataManager
       def create_game_objects
          local_create_game_objects
          $game_selfVars = Simple_Matrix.new
+         $game_database = Database.finalize
       end
       #--------------------------------------------------------------------------
       # * Saves the contents of the game
@@ -1338,6 +1314,7 @@ module DataManager
       def extract_save_contents(contents)
          local_extract_save_contents
          $game_selfVars = contents[:self_vars]
+         $game_database = Database.finalize
       end
    end
 end
