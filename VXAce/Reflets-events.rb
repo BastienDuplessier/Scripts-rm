@@ -84,7 +84,6 @@ class Sprite_Character
       end
     end
     vx_initialize(viewport, character) 
-    @reflect = nil
     @reflect = Sprite_Reflect.new(viewport, character, 2, @type) if @type != :none
   end
   #--------------------------------------------------------------------------
