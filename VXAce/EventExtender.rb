@@ -1194,7 +1194,18 @@ module Command
    # * Save handling
    #--------------------------------------------------------------------------
    def save_game(index) DataManager.save_game(index-1) end
-   def load_game(index) DataManager.load_game(index-1) end
+   def load_game(index, time = 100) 
+      DataManager.load_game(index-1) 
+      RPG::BGM.fade(time)
+      RPG::BGS.fade(time)
+      RPG::ME.fade(time)
+      Graphics.fadeout(time * Graphics.frame_rate / 1000)
+      RPG::BGM.stop
+      RPG::BGS.stop
+      RPG::ME.stop
+      $game_system.on_after_load
+      SceneManager.goto(Scene_Map)
+   end
    def save_exists?(index) DataManager.save_file_exists? end
    def delete_save(index) DataManager.delete_save_file(index-1) end
    #--------------------------------------------------------------------------
