@@ -1193,10 +1193,10 @@ module Command
    #--------------------------------------------------------------------------
    # * Save handling
    #--------------------------------------------------------------------------
-   def save_game(index) DataManager.save_game(index) end
-   def load_game(index) DataManager.load_game(index) end
+   def save_game(index) DataManager.save_game(index-1) end
+   def load_game(index) DataManager.load_game(index-1) end
    def save_exists?(index) DataManager.save_file_exists? end
-   def delete_save(index) DataManager.delete_save_file(index) end
+   def delete_save(index) DataManager.delete_save_file(index-1) end
    #--------------------------------------------------------------------------
    # * Device handling
    #--------------------------------------------------------------------------
