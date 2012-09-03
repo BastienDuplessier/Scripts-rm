@@ -527,7 +527,7 @@ module HWND
    # * Returns the RM HWND
    #--------------------------------------------------------------------------
    def get
-      name = "\x00" * 256
+      name = [].pack("x256")
       GetPrivateProfileStringA.('Game', 'Title', '', name, 255, ".\\Game.ini")
       name.delete!("\x00")
       return FindWindowA.('RGSS Player', name)
