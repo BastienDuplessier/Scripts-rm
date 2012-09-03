@@ -1312,7 +1312,7 @@ module DataManager
       # * Charges a save
       #--------------------------------------------------------------------------
       def extract_save_contents(contents)
-         local_extract_save_contents
+         local_extract_save_contents(contents)
          $game_selfVars = contents[:self_vars]
          $game_database = Database.finalize
       end
