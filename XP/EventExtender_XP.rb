@@ -1393,9 +1393,9 @@ class Scene_Title
    # * Main process
    #--------------------------------------------------------------------------
    def main
-      var_main
       $game_selfVars = Simple_Matrix.new
       $game_database = Database.finalize
+      var_main
    end
 end
 
