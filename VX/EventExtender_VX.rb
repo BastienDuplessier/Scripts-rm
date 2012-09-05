@@ -361,10 +361,10 @@ class Rect_Zone
    # * Updates the area
    #--------------------------------------------------------------------------
    def update
-      @x1 = @raw_x1 - ($game_map.display_x / 4)
-      @y1 = @raw_y1 - ($game_map.display_y / 4)
-      @x2 = @raw_x2 - ($game_map.display_x / 4)
-      @y2 = @raw_y2 - ($game_map.display_y / 4)
+      @x1 = @raw_x1 - ($game_map.display_x / 8)
+      @y1 = @raw_y1 - ($game_map.display_y / 8)
+      @x2 = @raw_x2 - ($game_map.display_x / 8)
+      @y2 = @raw_y2 - ($game_map.display_y / 8)
    end
 end
 
@@ -392,8 +392,8 @@ class Circle_Zone
    # * Updates the area
    #--------------------------------------------------------------------------
    def update
-      @x = @raw_x - ($game_map.display_x / 4)
-      @y = @raw_y - ($game_map.display_y / 4)
+      @x = @raw_x - ($game_map.display_x / 8)
+      @y = @raw_y - ($game_map.display_y / 8)
    end
    #--------------------------------------------------------------------------
    # * Checks if a point (x, y) is in an area
@@ -428,8 +428,8 @@ class Ellipse_Zone
    # * Updates the area
    #--------------------------------------------------------------------------
    def update
-      @x = @raw_x - ($game_map.display_x / 4)
-      @y = @raw_y - ($game_map.display_y / 4)
+      @x = @raw_x - ($game_map.display_x / 8)
+      @y = @raw_y - ($game_map.display_y / 8)
    end
    #--------------------------------------------------------------------------
    # * Checks if a point (x, y) is in an area
@@ -466,7 +466,7 @@ class Polygon_Zone
    # * Updates the area
    #--------------------------------------------------------------------------
    def update
-      new_x, new_y = $game_map.display_x / 4, $game_map.display_y / 4
+      new_x, new_y = $game_map.display_x / 8, $game_map.display_y / 8
       x_plus, y_plus = @last_x - new_x, @last_y - new_y
       @last_x, @last_y = new_x, new_y
       @points.each do |point|
@@ -516,7 +516,7 @@ module HWND
    #--------------------------------------------------------------------------
    # * Constants
    #--------------------------------------------------------------------------
-   FindWindow = Win32API.new('user32', 'FindWindow', 'pp', 'l')
+   FindWindowA = Win32API.new('user32', 'FindWindowA', 'pp', 'l')
    GetPrivateProfileStringA = Win32API.new('kernel32', 'GetPrivateProfileStringA', 'pppplp', 'l')
    ShowCursor = Win32API.new('user32', 'ShowCursor', 'i', 'i')
    #--------------------------------------------------------------------------
@@ -527,7 +527,10 @@ module HWND
    # * Returns the RM HWND
    #--------------------------------------------------------------------------
    def get
-      return FindWindow.call('RGSS Player', 0)
+      name = [].pack("x256")
+      GetPrivateProfileStringA.call('Game', 'Title', '', name, 255, ".\\Game.ini")
+      name.delete!("\x00")
+      return FindWindowA.call('RGSS Player', name)
    end
    #--------------------------------------------------------------------------
    # * Defines cursor displaying
@@ -550,7 +553,6 @@ module Mouse
    #--------------------------------------------------------------------------
    GetCursorPos = Win32API.new('user32', 'GetCursorPos', 'p', 'i')
    ScreenToClient = Win32API.new('user32', 'ScreenToClient', %w(l p), 'i')
-   @@pos = [].pack('x8')
    #--------------------------------------------------------------------------
    # * Binds methods to the class
    #--------------------------------------------------------------------------
@@ -559,9 +561,13 @@ module Mouse
    # * Returns mouse position
    #--------------------------------------------------------------------------
    def position
-      GetCursorPos.call(@@pos)
-      ScreenToClient.call(HWND.get, @@pos)
-      x, y = @@pos.unpack('ii')
+      pos = [0, 0].pack('ll')
+      p_value = nil
+      p_value = pos.unpack('ll') unless GetCursorPos.call(pos) == 0
+      pos = [p_value[0], p_value[1]].pack('ll')
+      p_value = nil
+      p_value = pos.unpack('ll') if ScreenToClient.call(HWND.get, pos)
+      x, y = p_value
       return {:x => x, :y => y}
    end
 end
@@ -577,6 +583,7 @@ module Key
    # * Constantes
    #--------------------------------------------------------------------------
    GetKeyState = Win32API.new('user32', 'GetKeyState', 'i', 'i')
+   GetAsyncKeyState = Win32API.new('user32', 'GetAsyncKeyState', 'i', 'i')
    GetAsyncKeyState = Win32API.new('user32', 'GetAsyncKeyState', 'i', 'i')
    SetKeyboardState = Win32API.new("user32","SetKeyboardState",'p','i')
    GetKeyboardState = Win32API.new("user32","GetKeyboardState", 'p','i')
@@ -836,7 +843,6 @@ class Game_Map
    def initialize
       pin_initialize
       @kept_pictures = []
-      @screen = $game_screen
    end
    #--------------------------------------------------------------------------
    # * Setup
@@ -888,7 +894,7 @@ end
 #==============================================================================
 # ** Sprite_Picture
 #------------------------------------------------------------------------------
-#  This sprite is used to display pictures. It observes an instance of the
+# This sprite is used to display pictures. It observes an instance of the
 # Game_Picture class and automatically changes sprite states.
 #==============================================================================
 
@@ -921,8 +927,8 @@ class Sprite_Picture
     fix_update_position
     @anchor = (@picture.name =~ /^FIX\-/) != nil || $game_map.pinned?(@picture.number)
     if @anchor
-      new_x =  @picture.x - ($game_map.display_x / 4) 
-      new_y =  @picture.y - ($game_map.display_y / 4) 
+      new_x =  @picture.x - ($game_map.display_x / 8) 
+      new_y =  @picture.y - ($game_map.display_y / 8) 
       self.x, self.y = new_x, new_y
     else
       self.x = @picture.x
@@ -1004,8 +1010,8 @@ class Line
    #--------------------------------------------------------------------------
    def equation
       return nil if @sx == @cx
-      fun = lambda{|x|@a*x + @b}
-      return fun
+      fun = lambda{|ap, bp, x|ap*x + bp}
+      return fun.curry.call(@a, @b)
    end
    #--------------------------------------------------------------------------
    # * Returns the Y for a given X
@@ -1032,12 +1038,11 @@ end
 #==============================================================================
 # ** Quicksave
 #------------------------------------------------------------------------------
-# Easy Save API
+# save API
 #==============================================================================
 
 module Quicksave
-  @save = Scene_Save.new
-  @load =  Scene_Load.new
+  @file = Scene_File.new(false, false, false)
   #--------------------------------------------------------------------------
   # * Singleton
   #--------------------------------------------------------------------------
@@ -1045,49 +1050,42 @@ module Quicksave
     #--------------------------------------------------------------------------
     # * Save a file
     #--------------------------------------------------------------------------
-    def save(id = -1)
-      id = $game_temp.last_file_index + 1 if id == -1
-      name_file = self.make_filename id
-      file = File.open(name_file, "wb")
-      @save.write_save_data(file)
+    def load(id)
+      id = 1 if id < 1
+      file = File.open(@file.make_filename(id -1), "rb")
+      @file.read_save_data(file)
       file.close
+      $scene = Scene_Map.new
+      RPG::BGM.fade(1500)
+      Graphics.fadeout(60)
+      Graphics.wait(40)
+      @file.last_bgm.play
+      @file.last_bgs.play
     end
     #--------------------------------------------------------------------------
     # * Load a file
     #--------------------------------------------------------------------------
-    def load(id = -1)
-      id = $game_temp.last_file_index + 1 if id == -1
-      name_file = self.make_filename id
-      file = File.open(name_file, "rb")
-      @load.read_save_data(file)
+    def save(id)
+      id = 1 if id < 1
+      file = File.open(@file.make_filename(id -1), "wb")
+      @file.write_save_data(file)
       file.close
-      $game_system.bgm_play($game_system.playing_bgm)
-      $game_system.bgs_play($game_system.playing_bgs)
-      # Update map (run parallel process event)
-      $game_map.update
-      # Switch to map screen
-      $scene = Scene_Map.new
     end
     #--------------------------------------------------------------------------
     # * Determine if a Save exists
     #--------------------------------------------------------------------------
     def exist?(id)
-      name_file = self.make_filename id
-      return File.exist?(name_file)
+      return File.exist?(@file.make_filename(id - 1))
     end
     #--------------------------------------------------------------------------
     # * Erase a file
     #--------------------------------------------------------------------------
-    def erase(id)
-      name_file = self.make_filename id
-      File.delete(name_file)  if File.exist? name_file
-    end
-    #--------------------------------------------------------------------------
-    # * Make File Name
-    #     file_index : save file index (0-3)
-    #--------------------------------------------------------------------------
-    def make_filename(file_index)
-      return "Save#{file_index}.rxdata"
+    def delete(id)
+      id = 1 if id < 1
+      unless exists?(id)
+        raise RuntimeError.new("Argument Invalide Exception")
+      end
+      File.delete(@file.make_filename(id - 1)) 
     end
   end
 end
@@ -1121,7 +1119,7 @@ module Command
    #--------------------------------------------------------------------------
    # * Operands for the party
    #--------------------------------------------------------------------------
-   def team_size() $game_party.actors.size end
+   def team_size() $game_party.members.size end
    def gold() $game_party.gold end
    def steps() $game_party.steps end
    def play_time() (Graphics.frame_count / Graphics.frame_rate) end
@@ -1131,8 +1129,8 @@ module Command
    # * Oerands for the items
    #--------------------------------------------------------------------------
    def item_count(id) $game_party.item_number($data_items[id]) end
-   def weapon_count(id) $game_party.weapon_number($data_weapons[id]) end
-   def armor_count(id) $game_party.armor_number($data_armors[id]) end
+   def weapon_count(id) $game_party.item_number($data_weapons[id]) end
+   def armor_count(id) $game_party.item_number($data_armors[id]) end
    #--------------------------------------------------------------------------
    # * Operands for the actors
    #--------------------------------------------------------------------------
@@ -1140,17 +1138,13 @@ module Command
    def level(id) $game_actors[id].level end
    def experience(id) $game_actors[id].exp end
    def hp(id) $game_actors[id].hp end
-   def mp(id) $game_actors[id].sp end
+   def mp(id) $game_actors[id].mp end
    def max_hp(id) $game_actors[id].maxhp end
-   def max_mp(id) $game_actors[id].maxsp end
+   def max_mp(id) $game_actors[id].maxmp end
    def attack(id) $game_actors[id].atk end
-   def dexterity(id) $game_actors[id].dex end
-   def strength(id) $game_actors[id].str end
-   def intelligence(id) $game_actors[id].int end
-   def defense(id) $game_actors[id].pdef end
-   def magic_defense(id) $game_actors[id].mdef end
+   def defense(id) $game_actors[id].def end
+   def intelligence(id) $game_actors[id].spi end
    def agility(id) $game_actors[id].agi end
-   def eva(id) $game_actors[id].eva end
    #--------------------------------------------------------------------------
    # * Operands for the events
    #--------------------------------------------------------------------------
@@ -1195,6 +1189,13 @@ module Command
       Math.hypot((event1.screen_x - event2.screen_x), (event1.screen_y-event2.screen_y))
    end
    #--------------------------------------------------------------------------
+   # * More operands for the party
+   #--------------------------------------------------------------------------
+   def actor_id(position)
+      actor = $game_party.members[position]
+      return actor ? actor.id : 0
+   end
+   #--------------------------------------------------------------------------
    # * Commands for database reading
    #--------------------------------------------------------------------------
    def read_monster_data(id, method = false)
@@ -1202,18 +1203,14 @@ module Command
       return monster unless method
       method = method.to_sym
       value = false
-      value = :hp if method == :mhp || method == :hp
-      value = :sp if method == :mmp || method == :mp
-      value = :maxsp if method == :maxmp || method == :maxsp
-      value = :maxhp if method == :maxhp || method == :maxpv
+      value = :maxhp if method == :mhp || method == :hp
+      value = :maxmp if method == :mmp || method == :mp
       value = :atk if method == :atk || method == :attack
-      value = :pdef if method == :def || method == :defense
-      value = :str if method == :str || method == :strength
-      value = :mdef if method == :mdf || method == :magic_defense
+      value = :def if method == :def || method == :defense
+      value = :spi if method == :spi || method == :intelligence
+      value = :hit if method == :hit || method == :hit_ratio
       value = :agi if method == :agi || method == :agility
-      value = :eva if method == :eva || method == :luck
-      value = :int if method == :int || method == :intelligence
-      value = :dex if method == :dex || method == :dexterity
+      value = :eva if method == :eva || method == :evasion
       monster.send(method)
    end
    def read_data_skill(id, method = false)
@@ -1287,12 +1284,12 @@ module Command
 end
 
 #==============================================================================
-# ** Interpreter
+# ** Game_Interpreter
 #------------------------------------------------------------------------------
 # Adding of the local variables support
 #==============================================================================
 
-class Interpreter
+class Game_Interpreter
    #--------------------------------------------------------------------------
    # * Getting a local variable
    #--------------------------------------------------------------------------
@@ -1339,43 +1336,32 @@ class Interpreter
 end
 
 #==============================================================================
-# ** Scene_Save
+# ** Scene_File
 #------------------------------------------------------------------------------
-# Add variable local support
+# Support VLocal
 #==============================================================================
 
-class Scene_Save
+class Scene_File
    #--------------------------------------------------------------------------
    # * Alias
    #--------------------------------------------------------------------------
    alias var_write_save_data write_save_data
+   alias var_read_save_data read_save_data
    #--------------------------------------------------------------------------
-   # * Save game
+   # * Save data
    #--------------------------------------------------------------------------
    def write_save_data(file)
       var_write_save_data(file)
       Marshal.dump($game_selfVars,file)
    end
-end
-
-#==============================================================================
-# ** Scene_Load
-#------------------------------------------------------------------------------
-# Add variable local support
-#==============================================================================
-
-class Scene_Load
    #--------------------------------------------------------------------------
-   # * Alias
-   #--------------------------------------------------------------------------
-   alias var_read_save_data read_save_data
-   #--------------------------------------------------------------------------
-   # * Load Game
+   # * Read data
    #--------------------------------------------------------------------------
    def read_save_data(file)
       var_read_save_data(file)
       $game_selfVars = Marshal.load(file)
    end
+
 end
 
 #==============================================================================
