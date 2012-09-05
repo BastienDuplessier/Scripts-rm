@@ -49,9 +49,9 @@ module Database
          # * Instructions
          # You can create the tables here
          #--------------------------------------------------------------------------
-         # Creating a table : create_table("table name", field1: :type, field2: :type, etc)
+         # Creating a table : create_table("table name", :field1 => :type, :field2 => :type, etc)
          # List of available types = :integer, :float, :bool, :string
-         create_table("Test", id: :int, name: :string, some_bool: :bool)
+         create_table("Test", :id=> int, :name =>:string, :some_bool=>:bool)
 
       end
       #--------------------------------------------------------------------------
@@ -361,10 +361,10 @@ class Rect_Zone
    # * Updates the area
    #--------------------------------------------------------------------------
    def update
-      @x1 = @raw_x1 - ($game_map.display_x * 32)
-      @y1 = @raw_y1 - ($game_map.display_y * 32)
-      @x2 = @raw_x2 - ($game_map.display_x * 32)
-      @y2 = @raw_y2 - ($game_map.display_y * 32)
+      @x1 = @raw_x1 - ($game_map.display_x / 4)
+      @y1 = @raw_y1 - ($game_map.display_y / 4)
+      @x2 = @raw_x2 - ($game_map.display_x / 4)
+      @y2 = @raw_y2 - ($game_map.display_y / 4)
    end
 end
 
@@ -392,8 +392,8 @@ class Circle_Zone
    # * Updates the area
    #--------------------------------------------------------------------------
    def update
-      @x = @raw_x - ($game_map.display_x * 32)
-      @y = @raw_y - ($game_map.display_y * 32)
+      @x = @raw_x - ($game_map.display_x / 4)
+      @y = @raw_y - ($game_map.display_y / 4)
    end
    #--------------------------------------------------------------------------
    # * Checks if a point (x, y) is in an area
@@ -428,8 +428,8 @@ class Ellipse_Zone
    # * Updates the area
    #--------------------------------------------------------------------------
    def update
-      @x = @raw_x - ($game_map.display_x * 32)
-      @y = @raw_y - ($game_map.display_y * 32)
+      @x = @raw_x - ($game_map.display_x / 4)
+      @y = @raw_y - ($game_map.display_y / 4)
    end
    #--------------------------------------------------------------------------
    # * Checks if a point (x, y) is in an area
@@ -466,7 +466,7 @@ class Polygon_Zone
    # * Updates the area
    #--------------------------------------------------------------------------
    def update
-      new_x, new_y = $game_map.display_x * 32, $game_map.display_y * 32
+      new_x, new_y = $game_map.display_x / 4, $game_map.display_y / 4
       x_plus, y_plus = @last_x - new_x, @last_y - new_y
       @last_x, @last_y = new_x, new_y
       @points.each do |point|
@@ -516,7 +516,7 @@ module HWND
    #--------------------------------------------------------------------------
    # * Constants
    #--------------------------------------------------------------------------
-   FindWindowA = Win32API.new('user32', 'FindWindowA', 'pp', 'l')
+   FindWindow = Win32API.new('user32', 'FindWindow', 'pp', 'l')
    GetPrivateProfileStringA = Win32API.new('kernel32', 'GetPrivateProfileStringA', 'pppplp', 'l')
    ShowCursor = Win32API.new('user32', 'ShowCursor', 'i', 'i')
    #--------------------------------------------------------------------------
@@ -527,17 +527,14 @@ module HWND
    # * Returns the RM HWND
    #--------------------------------------------------------------------------
    def get
-      name = [].pack("x256")
-      GetPrivateProfileStringA.('Game', 'Title', '', name, 255, ".\\Game.ini")
-      name.delete!("\x00")
-      return FindWindowA.('RGSS Player', name)
+      return FindWindow.call('RGSS Player', 0)
    end
    #--------------------------------------------------------------------------
    # * Defines cursor displaying
    #--------------------------------------------------------------------------
    def show_cursor(flag = true)
       value = flag ? 1 : 0
-      ShowCursor.(value)
+      ShowCursor.call(value)
    end
 end
 
@@ -553,6 +550,7 @@ module Mouse
    #--------------------------------------------------------------------------
    GetCursorPos = Win32API.new('user32', 'GetCursorPos', 'p', 'i')
    ScreenToClient = Win32API.new('user32', 'ScreenToClient', %w(l p), 'i')
+   @@pos = [].pack('x8')
    #--------------------------------------------------------------------------
    # * Binds methods to the class
    #--------------------------------------------------------------------------
@@ -561,14 +559,10 @@ module Mouse
    # * Returns mouse position
    #--------------------------------------------------------------------------
    def position
-      pos = [0, 0].pack('ll')
-      p_value = nil
-      p_value = pos.unpack('ll') unless GetCursorPos.(pos) == 0
-      pos = [p_value[0], p_value[1]].pack('ll')
-      p_value = nil
-      p_value = pos.unpack('ll') if ScreenToClient.(HWND.get, pos)
-      x, y = p_value
-      return {x: x, y: y}
+      GetCursorPos.call(@@pos)
+      ScreenToClient.call(HWND.get, @@pos)
+      x, y = @@pos.unpack('ii')
+      return {:x => x, :y => y}
    end
 end
 
@@ -584,7 +578,6 @@ module Key
    #--------------------------------------------------------------------------
    GetKeyState = Win32API.new('user32', 'GetKeyState', 'i', 'i')
    GetAsyncKeyState = Win32API.new('user32', 'GetAsyncKeyState', 'i', 'i')
-   GetAsyncKeyState = Win32API.new('user32', 'GetAsyncKeyState', 'i', 'i')
    SetKeyboardState = Win32API.new("user32","SetKeyboardState",'p','i')
    GetKeyboardState = Win32API.new("user32","GetKeyboardState", 'p','i')
 
@@ -593,13 +586,13 @@ module Key
       # * Checks if there is a click
       #--------------------------------------------------------------------------
       def click?(key)
-         return GetKeyState.(key) > 1
+         return GetKeyState.call(key) > 1
       end
       #--------------------------------------------------------------------------
       # * Checks if a key is pressed
       #--------------------------------------------------------------------------
       def press?(key)
-         return GetAsyncKeyState.(key) & 0x01 == 1
+         return !GetKeyState.call(key).between?(0, 1)
       end
    end
    #--------------------------------------------------------------------------
@@ -746,20 +739,20 @@ module Socket
       #--------------------------------------------------------------------------
       def sockaddr_in(host, port)
          sin_family = AF_INET
-         sin_port = Htons.(port)
-         in_addr = Inet_addr.(host)
+         sin_port = Htons.call(port)
+         in_addr = Inet_addr.call(host)
          sockaddr_in = [sin_family, sin_port, in_addr].pack('sSLx8')
          return sockaddr_in
       end
       #--------------------------------------------------------------------------
       # * Creating the Socket
       #--------------------------------------------------------------------------
-      def socket() return Socket.(AF_INET, SOCK_STREAM, 0) end
+      def socket() return Socket.call(AF_INET, SOCK_STREAM, 0) end
       #--------------------------------------------------------------------------
       # * Connecting
       #--------------------------------------------------------------------------
       def connect_sock(sock, sockaddr)
-         if Connect.(sock, sockaddr, sockaddr.size) == -1
+         if Connect.call(sock, sockaddr, sockaddr.size) == -1
          p "Impossible to connect"
          return
          end
@@ -778,7 +771,7 @@ module Socket
       # * Sending data
       #--------------------------------------------------------------------------
       def send(socket, data)
-         value = Send.(socket, data, data.length, 0)
+         value = Send.call(socket, data, data.length, 0)
          if value == -1
             p "Failed to send"
             shutdown(socket, 2)
@@ -792,18 +785,18 @@ module Socket
       #--------------------------------------------------------------------------
       def recv(socket, len = 256)
          buffer = [].pack('x'+len.to_s)
-         value = Recv.(socket, buffer, len, 0)
+         value = Recv.call(socket, buffer, len, 0)
          return buffer.gsub(/\x00/, "") if value != -1
          return false
       end
       #--------------------------------------------------------------------------
       # * Stops the emission
       #--------------------------------------------------------------------------
-      def shutdown(socket, how) Shutdown.(socket, how) end
+      def shutdown(socket, how) Shutdown.call(socket, how) end
       #--------------------------------------------------------------------------
       # * Closes the connection
       #--------------------------------------------------------------------------
-      def close(socket) Close.(socket) end
+      def close(socket) Close.call(socket) end
    end
 end
 
@@ -843,6 +836,7 @@ class Game_Map
    def initialize
       pin_initialize
       @kept_pictures = []
+      @screen = $game_screen
    end
    #--------------------------------------------------------------------------
    # * Setup
@@ -894,43 +888,49 @@ end
 #==============================================================================
 # ** Sprite_Picture
 #------------------------------------------------------------------------------
-# This sprite is used to display pictures. It observes an instance of the
+#  This sprite is used to display pictures. It observes an instance of the
 # Game_Picture class and automatically changes sprite states.
 #==============================================================================
 
 class Sprite_Picture
-   #--------------------------------------------------------------------------
-   # * alias
-   #--------------------------------------------------------------------------
-   alias pin_initialize initialize
-   alias pin_update_position update_position
-   #--------------------------------------------------------------------------
-   # * Public instance variables
-   #--------------------------------------------------------------------------
-   attr_accessor :anchor
-   #--------------------------------------------------------------------------
-   # * Object initialization
-   # picture : Game_Picture
-   #--------------------------------------------------------------------------
-   def initialize(viewport, picture)
-      pin_initialize(viewport, picture)
-      @anchor = (@picture.name =~ /^FIX\-/) != nil
-   end
-   #--------------------------------------------------------------------------
-   # * Update Position
-   #--------------------------------------------------------------------------
-   def update_position
-      @anchor = (@picture.name =~ /^FIX\-/) != nil || $game_map.pinned?(@picture.number)
-      if @anchor
-         new_x = @picture.x - ($game_map.display_x * 32)
-         new_y = @picture.y - ($game_map.display_y * 32)
-         self.x, self.y = new_x, new_y
-      else
-         self.x = @picture.x
-         self.y = @picture.y
-         self.z = @picture.number
-      end
-   end
+
+  #--------------------------------------------------------------------------
+  # * alias
+  #--------------------------------------------------------------------------
+  alias fix_initialize initialize
+  alias fix_update_position update
+
+  #--------------------------------------------------------------------------
+  # * Public Instance Variables
+  #--------------------------------------------------------------------------
+  attr_accessor :anchor
+
+  #--------------------------------------------------------------------------
+  # * Object Initialization
+  #     picture : Game_Picture
+  #--------------------------------------------------------------------------
+  def initialize(viewport, picture)
+    fix_initialize(viewport, picture)
+    @anchor = (@picture.name =~ /^FIX\-/) != nil
+  end
+
+  #--------------------------------------------------------------------------
+  # * Update Position
+  #--------------------------------------------------------------------------
+  def update
+    fix_update_position
+    @anchor = (@picture.name =~ /^FIX\-/) != nil || $game_map.pinned?(@picture.number)
+    if @anchor
+      new_x =  @picture.x - ($game_map.display_x / 4) 
+      new_y =  @picture.y - ($game_map.display_y / 4) 
+      self.x, self.y = new_x, new_y
+    else
+      self.x = @picture.x
+      self.y = @picture.y
+      self.z = @picture.number
+    end
+  end
+
 end
 
 #==============================================================================
@@ -1004,8 +1004,8 @@ class Line
    #--------------------------------------------------------------------------
    def equation
       return nil if @sx == @cx
-      fun = lambda{|ap, bp, x|ap*x + bp}
-      return fun.curry.(@a, @b)
+      fun = lambda{|x|@a*x + @b}
+      return fun
    end
    #--------------------------------------------------------------------------
    # * Returns the Y for a given X
@@ -1027,6 +1027,69 @@ class Line
       return 1 if y < @a*x+@b
       return 0
    end
+end
+
+#==============================================================================
+# ** Quicksave
+#------------------------------------------------------------------------------
+# Easy Save API
+#==============================================================================
+
+module Quicksave
+  @save = Scene_Save.new
+  @load =  Scene_Load.new
+  #--------------------------------------------------------------------------
+  # * Singleton
+  #--------------------------------------------------------------------------
+  class << self
+    #--------------------------------------------------------------------------
+    # * Save a file
+    #--------------------------------------------------------------------------
+    def save(id = -1)
+      id = $game_temp.last_file_index + 1 if id == -1
+      name_file = self.make_filename id
+      file = File.open(name_file, "wb")
+      @save.write_save_data(file)
+      file.close
+    end
+    #--------------------------------------------------------------------------
+    # * Load a file
+    #--------------------------------------------------------------------------
+    def load(id = -1)
+      id = $game_temp.last_file_index + 1 if id == -1
+      name_file = self.make_filename id
+      file = File.open(name_file, "rb")
+      @load.read_save_data(file)
+      file.close
+      $game_system.bgm_play($game_system.playing_bgm)
+      $game_system.bgs_play($game_system.playing_bgs)
+      # Update map (run parallel process event)
+      $game_map.update
+      # Switch to map screen
+      $scene = Scene_Map.new
+    end
+    #--------------------------------------------------------------------------
+    # * Determine if a Save exists
+    #--------------------------------------------------------------------------
+    def exist?(id)
+      name_file = self.make_filename id
+      return File.exist?(name_file)
+    end
+    #--------------------------------------------------------------------------
+    # * Erase a file
+    #--------------------------------------------------------------------------
+    def erase(id)
+      name_file = self.make_filename id
+      File.delete(name_file)  if File.exist? name_file
+    end
+    #--------------------------------------------------------------------------
+    # * Make File Name
+    #     file_index : save file index (0-3)
+    #--------------------------------------------------------------------------
+    def make_filename(file_index)
+      return "Save#{file_index}.rxdata"
+    end
+  end
 end
 
 #==============================================================================
@@ -1058,19 +1121,18 @@ module Command
    #--------------------------------------------------------------------------
    # * Operands for the party
    #--------------------------------------------------------------------------
-   def team_size() $game_party.members.size end
+   def team_size() $game_party.actors.size end
    def gold() $game_party.gold end
    def steps() $game_party.steps end
    def play_time() (Graphics.frame_count / Graphics.frame_rate) end
-   def timer() $game_timer.sec end
+   def timer() $game_system.timer / Graphics.frame_rate end
    def save_count() $game_system.save_count end
-   def battle_count() $game_system.battle_count end
    #--------------------------------------------------------------------------
    # * Oerands for the items
    #--------------------------------------------------------------------------
    def item_count(id) $game_party.item_number($data_items[id]) end
-   def weapon_count(id) $game_party.item_number($data_weapons[id]) end
-   def armor_count(id) $game_party.item_number($data_armors[id]) end
+   def weapon_count(id) $game_party.weapon_number($data_weapons[id]) end
+   def armor_count(id) $game_party.armor_number($data_armors[id]) end
    #--------------------------------------------------------------------------
    # * Operands for the actors
    #--------------------------------------------------------------------------
@@ -1078,15 +1140,17 @@ module Command
    def level(id) $game_actors[id].level end
    def experience(id) $game_actors[id].exp end
    def hp(id) $game_actors[id].hp end
-   def mp(id) $game_actors[id].mp end
-   def max_hp(id) $game_actors[id].mhp end
-   def max_mp(id) $game_actors[id].mmp end
+   def mp(id) $game_actors[id].sp end
+   def max_hp(id) $game_actors[id].maxhp end
+   def max_mp(id) $game_actors[id].maxsp end
    def attack(id) $game_actors[id].atk end
-   def defense(id) $game_actors[id].def end
-   def magic(id) $game_actors[id].mat end
-   def magic_defense(id) $game_actors[id].mdf end
+   def dexterity(id) $game_actors[id].dex end
+   def strength(id) $game_actors[id].str end
+   def intelligence(id) $game_actors[id].int end
+   def defense(id) $game_actors[id].pdef end
+   def magic_defense(id) $game_actors[id].mdef end
    def agility(id) $game_actors[id].agi end
-   def luck(id) $game_actors[id].luk end
+   def eva(id) $game_actors[id].eva end
    #--------------------------------------------------------------------------
    # * Operands for the events
    #--------------------------------------------------------------------------
@@ -1131,13 +1195,6 @@ module Command
       Math.hypot((event1.screen_x - event2.screen_x), (event1.screen_y-event2.screen_y))
    end
    #--------------------------------------------------------------------------
-   # * More operands for the party
-   #--------------------------------------------------------------------------
-   def actor_id(position)
-      actor = $game_party.members[position]
-      return actor ? actor.id : 0
-   end
-   #--------------------------------------------------------------------------
    # * Commands for database reading
    #--------------------------------------------------------------------------
    def read_monster_data(id, method = false)
@@ -1145,14 +1202,18 @@ module Command
       return monster unless method
       method = method.to_sym
       value = false
-      value = 0 if method == :mhp || method == :hp
-      value = 1 if method == :mmp || method == :mp
-      value = 2 if method == :atk || method == :attack
-      value = 3 if method == :def || method == :defense
-      value = 4 if method == :mat || method == :magic_attack
-      value = 5 if method == :mdf || method == :magic_defense
-      value = 6 if method == :agi || method == :agility
-      value = 7 if method == :luk || method == :luck
+      value = :hp if method == :mhp || method == :hp
+      value = :sp if method == :mmp || method == :mp
+      value = :maxsp if method == :maxmp || method == :maxsp
+      value = :maxhp if method == :maxhp || method == :maxpv
+      value = :atk if method == :atk || method == :attack
+      value = :pdef if method == :def || method == :defense
+      value = :str if method == :str || method == :strength
+      value = :mdef if method == :mdf || method == :magic_defense
+      value = :agi if method == :agi || method == :agility
+      value = :eva if method == :eva || method == :luck
+      value = :int if method == :int || method == :intelligence
+      value = :dex if method == :dex || method == :dexterity
       return monster.params[value] if value
       monster.send(method)
    end
@@ -1193,21 +1254,10 @@ module Command
    #--------------------------------------------------------------------------
    # * Save handling
    #--------------------------------------------------------------------------
-   def save_game(index) DataManager.save_game(index-1) end
-   def load_game(index, time = 100) 
-      DataManager.load_game(index-1) 
-      RPG::BGM.fade(time)
-      RPG::BGS.fade(time)
-      RPG::ME.fade(time)
-      Graphics.fadeout(time * Graphics.frame_rate / 1000)
-      RPG::BGM.stop
-      RPG::BGS.stop
-      RPG::ME.stop
-      $game_system.on_after_load
-      SceneManager.goto(Scene_Map)
-   end
-   def save_exists?(index) DataManager.save_file_exists? end
-   def delete_save(index) DataManager.delete_save_file(index-1) end
+   def save_game(index) Quicksave.save(index) end
+   def load_game(index) Quicksave.load(index) end
+   def save_exists?(index) Quicksave.exist?(index) end
+   def delete_save(index) Quicksave.erase(id) end
    #--------------------------------------------------------------------------
    # * Device handling
    #--------------------------------------------------------------------------
@@ -1238,12 +1288,12 @@ module Command
 end
 
 #==============================================================================
-# ** Game_Interpreter
+# ** Interpreter
 #------------------------------------------------------------------------------
 # Adding of the local variables support
 #==============================================================================
 
-class Game_Interpreter
+class Interpreter
    #--------------------------------------------------------------------------
    # * Getting a local variable
    #--------------------------------------------------------------------------
@@ -1290,43 +1340,43 @@ class Game_Interpreter
 end
 
 #==============================================================================
-# ** DataManager
+# ** Scene_Save
 #------------------------------------------------------------------------------
-# Lcal variables
+# Add variable local support
 #==============================================================================
 
-module DataManager
-   class << self
-      #--------------------------------------------------------------------------
-      # * Alias
-      #--------------------------------------------------------------------------
-      alias local_create_game_objects create_game_objects
-      alias local_make_save_contents make_save_contents
-      alias local_extract_save_contents extract_save_contents
-      #--------------------------------------------------------------------------
-      # * Creates the objects of the game
-      #--------------------------------------------------------------------------
-      def create_game_objects
-         local_create_game_objects
-         $game_selfVars = Simple_Matrix.new
-         $game_database = Database.finalize
-      end
-      #--------------------------------------------------------------------------
-      # * Saves the contents of the game
-      #--------------------------------------------------------------------------
-      def make_save_contents
-         contents = local_make_save_contents
-         contents[:self_vars] = $game_selfVars
-         contents
-      end
-      #--------------------------------------------------------------------------
-      # * Charges a save
-      #--------------------------------------------------------------------------
-      def extract_save_contents(contents)
-         local_extract_save_contents(contents)
-         $game_selfVars = contents[:self_vars]
-         $game_database = Database.finalize
-      end
+class Scene_Save
+   #--------------------------------------------------------------------------
+   # * Alias
+   #--------------------------------------------------------------------------
+   alias var_write_save_data write_save_data
+   #--------------------------------------------------------------------------
+   # * Save game
+   #--------------------------------------------------------------------------
+   def write_save_data(file)
+      var_write_save_data(file)
+      Marshal.dump($game_self_var,file)
+   end
+end
+
+#==============================================================================
+# ** Scene_Load
+#------------------------------------------------------------------------------
+# Add variable local support
+#==============================================================================
+
+class Scene_Load
+   #--------------------------------------------------------------------------
+   # * Alias
+   #--------------------------------------------------------------------------
+   alias var_read_save_data read_save_data
+   #--------------------------------------------------------------------------
+   # * Load Game
+   #--------------------------------------------------------------------------
+   def read_save_data(file)
+      var_read_save_data(file)
+      $game_self_var = Marshal.load(file)
+      $game_database = Database.finalize
    end
 end
 
