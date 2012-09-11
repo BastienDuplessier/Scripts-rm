@@ -22,7 +22,7 @@ class Bitmap
       when 6; x, y = decal, 0
       when 7; x, y = decal, -decal
       end
-      fact_opacity = (index == 8) ? 255/2 : 255/(index+1)
+      fact_opacity = (index == 7) ? 255/2 : 255/(index+1)
       self.blt(x, y, clone_bmp, rect, fact_opacity)
     end
     clone_bmp.dispose
