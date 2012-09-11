@@ -1,6 +1,6 @@
 # Module Pathfinder par Grim (inspiré par Avygeil EL3.0)
 # Détail des commandes
-
+# cmd(:move_to, ID_EVENT, X, Y)
 #==============================================================================
 # ** Pathfinder
 #------------------------------------------------------------------------------
