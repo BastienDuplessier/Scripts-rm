@@ -5,8 +5,19 @@
 # Par exemple, si on veut que l'évènement ne se déclenche que si la variable 
 # locale 3 de l'évènement 1 est à 8 :
 # Trigger : get(1, 3) == 8
+
 # Il est possible de coupler les conditions par exemple:
 # Trigger : get(1, 3) == 8 and get(1, 4) > 10
+# Trigger : (get(1, 3) == 8 or get(1, 4) >= 12) and V[10] == 7
+
+# Opérateurs logiques => and (et) or (ou)
+# opérateurs arithmétiques:
+# x > y (x est plus grand strictement que y)
+# x < y (y est plus grand strictement que x)
+# x <= y (y est plus grand ou égal que x)
+# x >= y (x est plus grand ou égal que y)
+# x == y (x est égal à y)
+# x != y (x est différent à y)
 
 # Par Grim, merci à Siegfried !
 #==============================================================================
