@@ -1,6 +1,8 @@
 # Module Pathfinder par Grim (inspiré par Avygeil EL3.0)
 # Détail des commandes
-# cmd(:move_to, ID_EVENT, X, Y)
+# cmd(:move_to, ID_EVENT, X, Y, wait(true ou false))
+# Wait est par défaut a false, si il est a true, le jeu attendra la fin du déplacement
+# Utilisez l'ID 0 pour déplacer le héros :)
 #==============================================================================
 # ** Pathfinder
 #------------------------------------------------------------------------------
@@ -123,7 +125,8 @@ module Pathfinder
 					current = current.parent
 				end
 			end
-			move_route.list.pop
+			move_route.skippable = true
+			move_route.repeat = false
 			return move_route
 		end
 	end
@@ -140,10 +143,11 @@ class Game_Character
 	#--------------------------------------------------------------------------
 	# * Move to x y coord
 	#--------------------------------------------------------------------------
-	def move_to_position(x, y)
+	def move_to_position(x, y, wait=false)
 		return if not $game_map.passable?(x,y,0)
 		route = Pathfinder.create_path(Pathfinder::Goal.new(x, y), self)
 		self.force_move_route(route)
+		Fiber.yield while self.move_route_forcing if wait
 	end
 end
 
@@ -162,7 +166,9 @@ module Command
 	# * Move event to a point (if the point 's passable)
 	# id = id of the event
 	#--------------------------------------------------------------------------
-	def move_to(id, x, y)
-		$game_map.events[id].move_to_position(x, y)
+	def move_to(id, x, y, wait = false)
+		character = $game_player
+		character = $game_map.events[id] if id != 0
+		character.move_to_position(x, y, wait)
 	end
 end
