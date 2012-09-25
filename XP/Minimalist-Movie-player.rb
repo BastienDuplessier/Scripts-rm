@@ -3,7 +3,9 @@
 # Movie.play("chemin du film")
 # Veillez a avoir un bon encodage et idéalement un film a la taille de votre 
 # résolution d'écran... j'ai eu la flemme de faire la position (qui est en plus
-# très facile a faire mais bon :D )
+# très facile a faire mais bon :D 
+
+)
 #===============================================================================
 # ** Movie
 #-------------------------------------------------------------------------------
