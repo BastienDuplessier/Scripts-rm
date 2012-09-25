@@ -135,7 +135,6 @@ module GUI
 		#--------------------------------------------------------------------------
 		# * variables d'instances
 		#--------------------------------------------------------------------------
-		attr_accessor :r, :g, :b, :gr
 		attr_reader :visibility
 		#--------------------------------------------------------------------------
 		# * Constructeur
@@ -149,7 +148,6 @@ module GUI
 			dw_style = WS_POPUP|WS_DLGFRAME|WS_TILED|WS_CAPTION
 			args = [ex_style, "static", name, dw_style, @x,@y,@w,@h, @@HWND, 0,0,0]
 			@window = CreateWindowEx.(*args)
-			@r, @g, @b, @gr = r, v, b, g
 			args2 = [0, "static", "[R: #{r}] [V: #{v}] [B: #{b}] [G: #{g}]", WS_CHILD|WS_VISIBLE,10,150,260,40, @window, 0,0,0]
 			@text = CreateWindowEx.(*args2)
 			@red = UI_Slider.new("red", 10, 32, @window, r)
@@ -182,7 +180,6 @@ module GUI
 			@green.set_value v
 			@blue.set_value b
 			@gray.set_value g
-			@r, @g, @b, @gr = r, v, b, g
 			ShowWindow.(@window, flag)
 			set_text r, v, b, g
 		end
