@@ -17,7 +17,7 @@
 
 # La troisième
 # -----------------------------------------------------------------------------
-# x.donne_valeur y
+# x.donner_valeur y
 # Attribue y comme valeur à la variable (eventmaking) x.
 
 # Note
