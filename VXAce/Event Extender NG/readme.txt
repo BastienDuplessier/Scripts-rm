@@ -1,3 +1,3 @@
 Event Extender
 ---------------------------------
-Version actuelle : 3.2
+Version actuelle : 3.5

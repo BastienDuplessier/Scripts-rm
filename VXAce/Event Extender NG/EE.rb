@@ -21,7 +21,7 @@
 # Raymo, Ypsoriama, Amalrich Von Monesser, Ulis, Magic, Strall, 2cri
 #==============================================================================
 
-# This version : 3.2
+# This version : 3.5
 # Official website of the project : http://eventextender.gri.im
 
 #==============================================================================
@@ -78,17 +78,6 @@ class Object
     return !(self == :false) if self.is_a?(Symbol)
     return !(self.empty?) if self.respond_to?(:empty?)
     return true
-  end
-  #--------------------------------------------------------------------------
-  # * Method suggestions
-  #--------------------------------------------------------------------------
-  def method_missing(*args)
-    keywords = self.methods + self.singleton_methods 
-    keywords += self.instance_variables + self.class.instance_methods(false)
-    keywords.uniq!.collect!{|i|i.to_s}
-    keywords.sort_by!{|o| o.damerau_levenshtein(args[0].to_s)}
-    msg = "#{args[0]} doesn't exists did you mean maybe #{keywords[0]} or #{keywords[1]}  ?"
-    raise(NoMethodError, msg)
   end
 end
 
@@ -1138,7 +1127,7 @@ module UI
       def value; @text; end
       #--------------------------------------------------------------------------
       # * Set the value
-      #--------------------------------------------------------------------------Arr
+      #--------------------------------------------------------------------------
       def value=(text)
         text = text[0..@range-1] if @range
         @text = text 
@@ -2458,11 +2447,35 @@ module DataManager
       contents
     end
     #--------------------------------------------------------------------------
-    # * Charges a save
+    # * Load a save
     #--------------------------------------------------------------------------
     def extract_save_contents(contents)
       extender_extract_save_contents(contents)
       $game_self_vars = contents[:self_vars]
+    end
+    #--------------------------------------------------------------------------
+    # * export data
+    #--------------------------------------------------------------------------
+    def export(index)
+      filename = sprintf("Save%02d.rvdata2", index)
+      datas = Hash.new
+      File.open(filename, "rb") do |file|
+        Marshal.load(file)
+        contents = Marshal.load(file)
+        game_system        = contents[:system]
+        game_timer         = contents[:timer]
+        game_message       = contents[:message]
+        datas[:switches]   = contents[:switches]
+        datas[:variables]  = contents[:variables]
+        datas[:self_switches] = contents[:self_switches]
+        game_actors        = contents[:actors]
+        game_party         = contents[:party]
+        game_troop         = contents[:troop]
+        game_map           = contents[:map]
+        game_player        = contents[:player]
+        datas[:self_vars]  = contents[:self_vars]
+      end
+      datas
     end
   end
 end
@@ -3337,7 +3350,18 @@ module Command
   # * Erase save
   #--------------------------------------------------------------------------
   def delete_save(index); DataManager.delete_save_file(index-1); end
-
+  #--------------------------------------------------------------------------
+  # * Import variables
+  #--------------------------------------------------------------------------
+  def import_variable(id_save, id_variable)
+    DataManager.export(id_save)[:variables][id_variable]
+  end
+  #--------------------------------------------------------------------------
+  # * Import switch
+  #--------------------------------------------------------------------------
+  def import_switch(id_save, id_switch)
+    DataManager.export(id_save)[:switches][id_switch]
+  end
   #==============================================================================
   # ** Area
   #------------------------------------------------------------------------------
@@ -3511,6 +3535,17 @@ module Command
     x = s_x - r_x
     y = s_y - r_y 
     ((Math.atan2(x, y))*(180.0/Math::PI))-180
+  end
+  #--------------------------------------------------------------------------
+  # * Method suggestions
+  #--------------------------------------------------------------------------
+  def method_missing(*args)
+    keywords = self.methods + self.singleton_methods 
+    keywords += self.instance_variables + self.class.instance_methods(false)
+    keywords.uniq!.collect!{|i|i.to_s}
+    keywords.sort_by!{|o| o.damerau_levenshtein(args[0].to_s)}
+    msg = "#{args[0]} doesn't exists did you mean maybe #{keywords[0]} or #{keywords[1]}  ?"
+    raise(NoMethodError, msg)
   end
   
   #--------------------------------------------------------------------------
