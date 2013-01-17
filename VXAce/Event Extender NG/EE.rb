@@ -21,7 +21,7 @@
 # Raymo, Ypsoriama, Amalrich Von Monesser, Ulis, Magic, Strall, 2cri
 #==============================================================================
 
-# This version : 3.5
+# This version : 3.5.1
 # Official website of the project : http://eventextender.gri.im
 
 #==============================================================================
@@ -1552,7 +1552,7 @@ module Area
       y_min = [y1, y2].min
       y_max = [y1, y2].max
       width = x_max - x_min
-      height = y_max - ymin
+      height = y_max - y_min
       super(x_min, y_min, width, height)
     end
   end
@@ -3536,6 +3536,7 @@ module Command
     y = s_y - r_y 
     ((Math.atan2(x, y))*(180.0/Math::PI))-180
   end
+  
   #--------------------------------------------------------------------------
   # * Method suggestions
   #--------------------------------------------------------------------------
