@@ -21,7 +21,7 @@
 # Raymo, Ypsoriama, Amalrich Von Monesser, Ulis, Magic, Strall, 2cri
 #==============================================================================
 
-# This version : 3.5.1
+# This version : 3.5.2
 # Official website of the project : http://eventextender.gri.im
 
 #==============================================================================
@@ -2357,9 +2357,10 @@ class Game_Interpreter
   #--------------------------------------------------------------------------
   # * Alias
   #--------------------------------------------------------------------------
-  alias extender_run run
   alias extender_command_101 command_101
+  alias extender_command_111 command_111
   alias extender_command_105 command_105
+  alias extender_command_355 command_355 
   #--------------------------------------------------------------------------
   # * Singleton
   #--------------------------------------------------------------------------
@@ -2369,14 +2370,6 @@ class Game_Interpreter
     #--------------------------------------------------------------------------
     attr_accessor :current_event_id
     attr_accessor :current_map_id
-  end
-  #--------------------------------------------------------------------------
-  # * Execute
-  #--------------------------------------------------------------------------
-  def run
-    Game_Interpreter.current_event_id = @event_id
-    Game_Interpreter.current_map_id = @map_id
-    extender_run
   end
   #--------------------------------------------------------------------------
   # * Show Text
@@ -2406,6 +2399,22 @@ class Game_Interpreter
     child = Game_Interpreter.new(@depth + 1)
     child.setup(list, same_map? ? @event_id : 0)
     child.run
+  end
+  #--------------------------------------------------------------------------
+  # * Conditional Branch
+  #--------------------------------------------------------------------------
+  def command_111
+    Game_Interpreter.current_event_id = @event_id
+    Game_Interpreter.current_map_id = @map_id
+    extender_command_111
+  end
+  #--------------------------------------------------------------------------
+  # * Script
+  #--------------------------------------------------------------------------
+  def command_355
+    Game_Interpreter.current_event_id = @event_id
+    Game_Interpreter.current_map_id = @map_id
+    extender_command_355
   end
   #--------------------------------------------------------------------------
   # * Add command API
