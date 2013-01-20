@@ -1501,7 +1501,7 @@ module UI
         self.arrows_visible = false
         self.padding = p
         self.padding_bottom = pb
-        self.contents = Bitmap.new(w, h)
+        self.contents = Bitmap.new(w-8, h)
         self.contents.font.size = ts
         @align = align%3
         @text = t
@@ -3923,7 +3923,7 @@ module Command
   #--------------------------------------------------------------------------
   # * Create a Textfield
   #--------------------------------------------------------------------------
-  def create_textfield(type, x, y, w, t="", a=:left, range=-1, h=54)
+  def create_textfield(type, x, y, w, t="", a=:left, range=-1, h=38)
     align = 0
     align = 1 if a == :center
     align = 2 if a == :right
