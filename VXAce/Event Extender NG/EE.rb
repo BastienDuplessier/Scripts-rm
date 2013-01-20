@@ -14,15 +14,32 @@
 # - Avygeil (A lot of inspiration)
 # - Heos (Beta test)
 # - Zangther (Some various help and Regexp)
+# - Lidenvice (Help for test and ergonomic reflection and proofreading)
+# - Ulis (proofreading)
+# - Hiino ♥ (proofreading and translation)
 #------------------------------------------------------------------------------
 # And for their social and technic help:
-# Magi, Hiino, XHTMLBoy Lidenvice, Raho, Joke, Al Rind, Testament, 
+# Magi, Hiino, XHTMLBoy, Raho, Joke, Al Rind, Testament, 
 # S4suk3, Tonyryu, Siegfried, Berka, Nagato Yuki, Fabien, Roys, 
-# Raymo, Ypsoriama, Amalrich Von Monesser, Ulis, Magic, Strall, 2cri
+# Raymo, Ypsoriama, Amalrich Von Monesser, Magic, Strall, 2cri,
+# TI-MAX, Playm, Kmkzy
 #==============================================================================
 
-# This version : 3.5.2
+# This version : 3.6
 # Official website of the project : http://eventextender.gri.im
+
+#==============================================================================
+# ** Configuration
+#------------------------------------------------------------------------------
+# Configuration of the Event Extender
+#==============================================================================
+
+module Configuration
+  #--------------------------------------------------------------------------
+  # * Key to launch Tone Manager
+  #--------------------------------------------------------------------------
+  KEY_TONE_MANAGER = :f3
+end
 
 #==============================================================================
 # ** Command
@@ -215,21 +232,34 @@ class Win32API
   #--------------------------------------------------------------------------
   # * Librairy
   #--------------------------------------------------------------------------
+  CloseClipboard = self.new('user32', 'CloseClipboard', 'v', 'i')
   CloseSocket = self.new('ws2_32', 'closesocket', 'p', 'l')
   Connect = self.new('ws2_32', 'connect', 'ppl', 'l')
   DestroyCursor = self.new('user32', 'DestroyCursor', 'p', 'l')
+  EmptyClipboard = self.new('user32', 'EmptyClipboard', 'v', 'i')
+  EnumClipboardFormats = self.new('user32', 'EnumClipboardFormats','i', 'i')
   FindWindowA = self.new('user32', 'FindWindowA', 'pp', 'l')
+  GetClipboardData = self.new('user32', 'GetClipboardData', 'i', 'i')
   GetCursorPos = self.new('user32', 'GetCursorPos', 'p', 'i')
+  GetClipboardFormatName = self.new('user32', 'GetClipboardFormatName', 'ipi', 'i')
   GetKeyboardState = self.new('user32', 'GetKeyboardState', 'p', 'i')
   GetKeyState = self.new('user32', 'GetKeyState', 'i', 'i')
   GetPrivateProfileStringA = self.new('kernel32', 'GetPrivateProfileStringA', 'pppplp', 'l')
+  GlobalAlloc = self.new('kernel32', 'GlobalAlloc', 'ii', 'i')
+  GlobalFree = self.new('kernel32', 'GlobalFree', 'i', 'i')
+  GlobalLock = self.new('kernel32', 'GlobalLock', 'i', 'l')
   Htons = self.new('ws2_32', 'htons', 'l', 'l')
   Inet_Addr = self.new('ws2_32', 'inet_addr', 'p', 'l')
-  MapVirtualKey = self.new('user32'  , 'MapVirtualKey', 'ii', 'i')
+  MapVirtualKey = self.new('user32', 'MapVirtualKey', 'ii', 'i')
+  MessageBox = self.new('user32','MessageBox','lppl','i')
+  Memcpy = self.new('msvcrt','memcpy', 'ipi', 'i')
   MultiByteToWideChar = self.new('kernel32', 'MultiByteToWideChar', 'ilpipi', 'i')
+  OpenClipboard = self.new('user32', 'OpenClipboard', 'i', 'i')
   Recv = self.new('ws2_32', 'recv', 'ppll', 'l')
+  RegisterClipboardFormat = self.new('user32', 'RegisterClipboardFormat', 'p', 'i')
   ScreenToClient  = self.new('user32', 'ScreenToClient', 'lp', 'i')
   Send = self.new('ws2_32', 'send', 'ppll', 'l')
+  SetClipboardData = self.new('user32', 'SetClipboardData', 'ii', 'i')
   ShowCursor = self.new('user32', 'ShowCursor', 'i', 'i')
   Shutdown = self.new('ws2_32', 'shutdown', 'pl', 'l')
   Socket = self.new('ws2_32', 'socket', 'lll', 'l')
@@ -262,7 +292,27 @@ class Win32API
       second_buffer.delete!("\x00") if to == 0
       return second_buffer
     end
+    #--------------------------------------------------------------------------
+    # * Push command in clipboard (Thanks to Zeus81)
+    #--------------------------------------------------------------------------
+    def push_in_clipboard(*commands)
+      clip_data = Marshal.dump(commands)
+      clip_data.insert(0, [clip_data.size].pack('L'))
+      OpenClipboard.(0)
+      EmptyClipboard.()
+      hmem = GlobalAlloc.(0x42, clip_data.length)
+      mem = GlobalLock.(hmem)
+      Memcpy.(mem, clip_data, clip_data.length)
+      SetClipboardData.(EVENT_FORMAT, hmem)
+      GlobalFree.(hmem)
+      CloseClipboard.()
+      self
+    end
+    def get_clipboard_format(key)
+      Win32API::RegisterClipboardFormat.(key)
+    end
   end
+  EVENT_FORMAT = get_clipboard_format("VX Ace EVENT_COMMAND")
 end
 
 #==============================================================================
@@ -375,6 +425,59 @@ class Rect
   #--------------------------------------------------------------------------
   def clicked?(key)
     hover? && UI::Mouse.click?(key)
+  end
+end
+
+#==============================================================================
+# ** Graphical_Rect
+#------------------------------------------------------------------------------
+#  The rectangle class.
+#==============================================================================
+
+class Graphical_Rect < Rect
+  #--------------------------------------------------------------------------
+  # * Initialize
+  #--------------------------------------------------------------------------
+  def initialize(x, y, w, h, z, ic, oc)
+    super(x, y, w, h)
+    @disposed = false
+    @z = z
+    @ic, @oc = ic, oc
+    create_sprite
+  end
+  #--------------------------------------------------------------------------
+  # * Create sprite
+  #--------------------------------------------------------------------------
+  def create_sprite
+    @box = Sprite.new
+    @box.x, @box.y = self.x, self.y
+    @box.z = @z
+    @box.bitmap = Bitmap.new(self.width, self.height)
+    @box.bitmap.fill_rect(0, 0, self.width, self.height, @oc)
+    @box.bitmap.fill_rect(1, 1, self.width-2, self.height-2, @ic)
+  end
+  #--------------------------------------------------------------------------
+  # * Draw Text
+  #--------------------------------------------------------------------------
+  def draw_text(text, c=Color.new(0,0,0), s=15)
+    @box.bitmap.font.color = c
+    @box.bitmap.font.outline = false
+    @box.bitmap.font.shadow = false
+    @box.bitmap.font.size = s
+    @box.bitmap.draw_text(1, 1, self.width-2, self.height-2, text, 1)
+  end
+  #--------------------------------------------------------------------------
+  # * Dispose rect
+  #--------------------------------------------------------------------------
+  def dispose
+    @box.dispose
+    @disposed = true
+  end
+  #--------------------------------------------------------------------------
+  # * Check Dispose
+  #--------------------------------------------------------------------------
+  def disposed?
+    @disposed
   end
 end
 
@@ -1079,6 +1182,305 @@ module UI
   #==============================================================================
 
   module Form
+    
+    #==============================================================================
+    # ** Tone Manager
+    #------------------------------------------------------------------------------
+    #  Window tone manage
+    #==============================================================================
+    
+    class ToneManager
+      #--------------------------------------------------------------------------
+      # * Object initialize
+      #--------------------------------------------------------------------------
+      def initialize(x, y)
+        @disposed = false
+        @in_transfert = false
+        @tone = $game_map.screen.tone.clone
+        @window = Window_Base.new(x, y, 180, 270)
+        @window.contents.font.size = 18
+        @window.contents.draw_text(0, 0, 180-32, 20, "Tone Manager" ,1)
+        @window.tone = Tone.new(100, 100, 100)
+        y += 24
+        x += 8
+        @track = Hash.new
+        r = 255+@tone.red
+        g = 255+@tone.green
+        b = 255+@tone.blue
+        gr = @tone.gray
+        @track[:red] = Trackbar.new(x, y+16, r, 0, 510, 164, 8, @window.z+10, Color.new(255, 0, 0))
+        @track[:gre] = Trackbar.new(x, y+32, g, 0, 510, 164, 8, @window.z+10, Color.new(0, 255, 0))
+        @track[:blu] = Trackbar.new(x, y+48, b, 0, 510, 164, 8, @window.z+10, Color.new(0, 0, 255))
+        @track[:gra] = Trackbar.new(x, y+64, gr, 0, 255, 164, 8, @window.z+10)
+        @inputs = Hash.new
+        @inputs[:red] = Window_Intfield.new(x, y+80, 80, @tone.red, 36, 1, (-255..255), 18, 6)
+        @inputs[:gre] = Window_Intfield.new(x, y+118, 80, @tone.green, 36, 1, (-255..255), 18, 6)
+        @inputs[:blu] = Window_Intfield.new(x, y+156, 80, @tone.blue, 36, 1, (-255..255), 18, 6)
+        @inputs[:gra] = Window_Intfield.new(x, y+194, 80, @tone.gray, 36, 1, (-255..255), 18, 6)
+        @window.draw_text(82, 92, 80, 20, "Time")
+        @time = Window_Intfield.new(x+82, y+100, 80, 0, 36, 1, (0..600), 18, 6)
+        @inputs[:red].tone.set(255, 0, 0)
+        @inputs[:gre].tone.set(0, 255, 0)
+        @inputs[:blu].tone.set(0, 0, 255)
+        @inputs[:gra].tone.set(120, 120, 120)
+        @checkbox = Checkbox.new(x+82, y+140,@window.z+10, false)
+        @window.draw_text(100, 150, 80, 20, "Wait?")
+        @try = Graphical_Rect.new(x+82, y+168, 80, 22,@window.z+10, Color.new(120,120,120), Color.new(0,0,0))
+        @try.draw_text("Try tone")
+        @past = Graphical_Rect.new(x+82, y+192, 80, 22,@window.z+10, Color.new(120,120,120), Color.new(0,0,0))
+        @past.draw_text("Make command")
+      end
+      #--------------------------------------------------------------------------
+      # * Update
+      #--------------------------------------------------------------------------
+      def update
+        return if disposed?
+        r = @inputs[:red].value 
+        g = @inputs[:gre].value 
+        bl = @inputs[:blu].value 
+        gr = @inputs[:gra].value 
+        n_t = Tone.new(r, g, bl, gr)
+        @checkbox.update
+        unless @in_transfert
+          @track.each do |k,t|
+            t.update 
+            if @inputs[k].active?
+              fact = (k == :gra) ? 0 : 255
+              t.value = fact + @inputs[k].value
+            end
+          end
+          @inputs.each do |k,t|
+            fact = (k == :gra) ? 0 : -255
+            t.value = fact + @track[k].value unless t.active
+            t.opacity = (t.active?) ? 255 : 125
+            if t.clicked?(:mouse_left)
+              @inputs.each{|a,b|b.active = false}
+              @time.active = false
+              t.active = true
+            end
+            t.active = false if UI::Mouse.trigger?(:mouse_left) && t.active?
+            t.update
+          end
+        end
+        if @time.clicked?(:mouse_left)
+          @inputs.each{|a,b|b.active = false}
+          @time.active = true
+        end
+        @time.opacity = (@time.active?) ? 255 : 125
+        @time.update
+        check_tone
+        if @try.hover? && UI::Mouse.trigger?(:mouse_left) && !@in_transfert
+          $game_map.screen.start_tone_change(@tone, 0)
+          $game_map.screen.start_tone_change(n_t, @time.value)
+        end
+        @in_transfert = $game_map.screen.tone_duration > 0
+        if @past.hover? && UI::Mouse.trigger?(:mouse_left)
+          Win32API.push_in_clipboard(RPG::EventCommand.new(223, 0, [n_t, @time.value, @checkbox.value]))
+          Win32API::MessageBox.(0, "Command push in Clipboard", "Info:", 0)
+        end
+      end
+      #--------------------------------------------------------------------------
+      # * Check tone
+      #--------------------------------------------------------------------------
+      def check_tone
+        r = @inputs[:red].value != $game_map.screen.tone.red
+        g = @inputs[:gre].value != $game_map.screen.tone.green
+        b = @inputs[:blu].value != $game_map.screen.tone.blue
+        a = @inputs[:gra].value != $game_map.screen.tone.gray
+        if (r || g || b || a) && !@in_transfert
+          r = @inputs[:red].value 
+          g = @inputs[:gre].value 
+          b = @inputs[:blu].value 
+          a = @inputs[:gra].value 
+          t = Tone.new(r, g, b, a)
+          $game_map.screen.start_tone_change(t, 0)
+        end
+      end
+      #--------------------------------------------------------------------------
+      # * Dispose
+      #--------------------------------------------------------------------------
+      def dispose
+        @disposed = true
+        $game_map.screen.start_tone_change(@tone, 0)
+        @window.dispose
+        @track.each{|k,t|t.dispose}
+        @inputs.each{|k,t| t.dispose}
+        @time.dispose
+        @checkbox.dispose
+        @try.dispose
+        @past.dispose
+      end
+      #--------------------------------------------------------------------------
+      # * Check disposition
+      #--------------------------------------------------------------------------
+      def disposed?
+        @disposed
+      end
+    end
+    
+    #==============================================================================
+    # ** Checkbox
+    #------------------------------------------------------------------------------
+    #  Simple checkbox definition
+    #==============================================================================
+    
+    class Checkbox
+      #--------------------------------------------------------------------------
+      # * Public instance variable
+      #--------------------------------------------------------------------------
+      attr_accessor :value
+      #--------------------------------------------------------------------------
+      # * Object initialize
+      #--------------------------------------------------------------------------
+      def initialize(x, y, z, default = false)
+        @dispose = false
+        @x, @y = x, y
+        @value = default
+        @box = Sprite.new
+        @box.x, @box.y, @box.z = x, y, z
+        @rect = Rect.new(x, y, 16, 16)
+        @box.bitmap = Bitmap.new(16, 16)
+        empty_box
+        draw_choice if @value
+      end
+      #--------------------------------------------------------------------------
+      # * Create empty box
+      #--------------------------------------------------------------------------
+      def empty_box
+        @box.bitmap.clear
+        @box.bitmap.font.size = 14
+        @box.bitmap.font.outline = false
+        @box.bitmap.font.shadow = false
+        @box.bitmap.font.italic = true
+        @box.bitmap.font.color = Color.new(0,0,0)
+        @box.bitmap.fill_rect(0, 0, 16, 16, Color.new(0,0,0))
+        @box.bitmap.fill_rect(1, 1, 14, 14, Color.new(255,255,255))
+      end
+      #--------------------------------------------------------------------------
+      # * Draw choice
+      #--------------------------------------------------------------------------
+      def draw_choice
+        @box.bitmap.draw_text(1, 1, 14, 14, "V", 1)
+      end
+      #--------------------------------------------------------------------------
+      # * Dispose
+      #--------------------------------------------------------------------------
+      def dispose
+        @dispose = true
+        @box.dispose
+      end
+      #--------------------------------------------------------------------------
+      # * Check disposition
+      #--------------------------------------------------------------------------
+      def disposed?
+        @dispose
+      end
+      #--------------------------------------------------------------------------
+      # * update
+      #--------------------------------------------------------------------------
+      def update
+        if @rect.hover? && UI::Mouse.trigger?(:mouse_left)
+          @value = !@value
+          if @value
+            draw_choice
+          else
+            empty_box
+          end
+        end
+      end
+    end
+    
+    #==============================================================================
+    # ** Trackbar
+    #------------------------------------------------------------------------------
+    #  Simple trackbar definition
+    #==============================================================================
+    
+    class Trackbar
+      #--------------------------------------------------------------------------
+      # * Public instance variable
+      #--------------------------------------------------------------------------
+      attr_accessor :value
+      #--------------------------------------------------------------------------
+      # * Object initialize
+      #--------------------------------------------------------------------------
+      def initialize(x,y,value=0,min=0,max=100,width=250,height=16,z=100, cb = Color.new(200, 200, 200))
+        @click = false
+        @x, @y, @value, @z = x, y, value, z
+        @min, @max = min, max
+        @width, @height = width, height
+        @color_b = cb
+        create_trackbg
+        create_button
+        calc_pos_button
+      end
+      #--------------------------------------------------------------------------
+      # * Mutator of value
+      #--------------------------------------------------------------------------
+      def value=(v)
+        @value = [[v, @min].max, @max].min
+      end
+      #--------------------------------------------------------------------------
+      # * create_bg
+      #--------------------------------------------------------------------------
+      def create_trackbg
+        @bg = Sprite.new
+        @bg.z = @z
+        @bg.x, @bg.y = @x, @y
+        @bg.bitmap = Bitmap.new(@width, @height)
+        @bg.bitmap.fill_rect(0, 0, @width, @height, Color.new(120, 120, 120))
+      end
+      #--------------------------------------------------------------------------
+      # * create_button
+      #--------------------------------------------------------------------------
+      def create_button
+        @button = Sprite.new
+        @button.z = @z+1
+        @button.x, @button.y = @x, @y
+        @button.bitmap = Bitmap.new(@height, @height)
+        @button.bitmap.fill_rect(0, 0, @height, @height, @color_b)
+      end
+      #--------------------------------------------------------------------------
+      # * calcul button position
+      #--------------------------------------------------------------------------
+      def calc_pos_button
+        total_width = @width-@height
+        total_data = @max - @min
+        @button.x = @x + ((@value/total_data.to_f)*total_width.to_i)
+        @rect = Rect.new(@button.x, @y, @height, @height)
+      end
+      #--------------------------------------------------------------------------
+      # * Dispose track
+      #--------------------------------------------------------------------------
+      def dispose
+        @bg.dispose
+        @button.dispose
+      end
+      #--------------------------------------------------------------------------
+      # * Update frame
+      #--------------------------------------------------------------------------
+      def update
+        update_track
+        update_button
+      end
+      #--------------------------------------------------------------------------
+      # * Update button
+      #--------------------------------------------------------------------------
+      def update_button
+        calc_pos_button
+      end
+      #--------------------------------------------------------------------------
+      # * Update track
+      #--------------------------------------------------------------------------
+      def update_track
+        @click = true if @rect.clicked?(:mouse_left)
+        if @click && UI::Mouse.click?(:mouse_left)
+          self.value += (UI::Mouse.x - @button.x)/2
+        else
+          @click = false
+        end
+      end
+    end
 
     #==============================================================================
     # ** Window_Field
@@ -1094,9 +1496,13 @@ module UI
       #--------------------------------------------------------------------------
       # * Object initialize
       #--------------------------------------------------------------------------
-      def initialize(x, y, w, t, h, align, range)
+      def initialize(x, y, w, t, h, align, range, ts, p=6, pb=6)
         super(x, y, w, h)
-        self.padding = 6
+        self.arrows_visible = false
+        self.padding = p
+        self.padding_bottom = pb
+        self.contents = Bitmap.new(w, h)
+        self.contents.font.size = ts
         @align = align%3
         @text = t
         @range = (range == -1) ? false : range
@@ -1109,13 +1515,12 @@ module UI
       #--------------------------------------------------------------------------
       def refresh
         self.contents.clear
-        self.contents.draw_text(0, 0, self.contents.width, 40, @text, @align)
+        self.contents.draw_text(0, 0, self.contents.width, self.contents.font.size, @text, @align)
       end
       #--------------------------------------------------------------------------
       # * Frame update
       #--------------------------------------------------------------------------
       def update
-        super
         if @old_text != @text
           refresh
           @old_text = @text.dup
@@ -1131,6 +1536,12 @@ module UI
       def value=(text)
         text = text[0..@range-1] if @range
         @text = text 
+      end
+      #--------------------------------------------------------------------------
+      # * Check window activity
+      #--------------------------------------------------------------------------
+      def active?
+        self.active
       end
     end
 
@@ -1148,9 +1559,9 @@ module UI
       #--------------------------------------------------------------------------
       # * Object initialize
       #--------------------------------------------------------------------------
-      def initialize(x, y, w, t="", h=54, align=0, range=-1)
+      def initialize(x, y, w, t="", h=54, align=0, range=-1, ts=22, p=6, pb=6)
         t = t[0..range-1] if range > 0
-        super(x, y, w, t, h, align, range)
+        super(x, y, w, t, h, align, range, ts, p, pb)
       end
       #--------------------------------------------------------------------------
       # * Update
@@ -1182,9 +1593,9 @@ module UI
       #--------------------------------------------------------------------------
       # * Object initialize
       #--------------------------------------------------------------------------
-      def initialize(x, y, w, t=0, h=54, align=0, range=-1)
+      def initialize(x, y, w, t=0, h=54, align=0, range=-1, ts=22, p=6, pb=6)
         range = -1 unless range.is_a?(Range)
-        super(x, y, w, t.to_i.to_s, h, align, range)  
+        super(x, y, w, t.to_i.to_s, h, align, range, ts, p, pb)  
         @text = ([[@range.min, t.to_i].max, @range.max].min).to_s if @range
       end
       #--------------------------------------------------------------------------
@@ -1231,9 +1642,9 @@ module UI
       #--------------------------------------------------------------------------
       # * Object initialize
       #--------------------------------------------------------------------------
-      def initialize(x, y, w, t=0.0, h=54, align=0, range=-1)
+      def initialize(x, y, w, t=0.0, h=54, align=0, range=-1, ts=22, p=6, pb=6)
         range = -1 unless range.is_a?(Range)
-        super(x, y, w, t.to_f.to_s, h, align, range)  
+        super(x, y, w, t.to_f.to_s, h, align, range, ts, p, pb)  
         @text = ([[@range.min, t.to_f].max, @range.max].min).to_s if @range   
       end
       #--------------------------------------------------------------------------
@@ -1529,10 +1940,22 @@ module Area
       in?(UI::Mouse.x, UI::Mouse.y)
     end
     #--------------------------------------------------------------------------
+    # * check if the mouse 's hover (square)
+    #--------------------------------------------------------------------------
+    def hover_square?
+      in?(UI::Mouse.x_square, UI::Mouse.y_square)
+    end
+    #--------------------------------------------------------------------------
     # * check if the mouse 's click the rect
     #--------------------------------------------------------------------------
     def clicked?(key)
       hover? && UI::Mouse.click?(key)
+    end
+    #--------------------------------------------------------------------------
+    # * check if the mouse 's click the rect (square)
+    #--------------------------------------------------------------------------
+    def clicked_square?(key)
+      hover_square? && UI::Mouse.click?(key)
     end
   end
 
@@ -1554,6 +1977,18 @@ module Area
       width = x_max - x_min
       height = y_max - y_min
       super(x_min, y_min, width, height)
+    end
+    #--------------------------------------------------------------------------
+    # * check if the mouse 's hover (square)
+    #--------------------------------------------------------------------------
+    def hover_square?
+      in?(UI::Mouse.x_square, UI::Mouse.y_square)
+    end
+    #--------------------------------------------------------------------------
+    # * check if the mouse 's click the rect (square)
+    #--------------------------------------------------------------------------
+    def clicked_square?(key)
+      hover_square? && UI::Mouse.click?(key)
     end
   end
 
@@ -1716,6 +2151,46 @@ class Window_Base
     end
     return result
   end
+  #--------------------------------------------------------------------------
+  # * set font size
+  #--------------------------------------------------------------------------
+  def set_font_size(s)
+    self.contents.font.size = s
+  end
+  #--------------------------------------------------------------------------
+  # * point include in textfield
+  #--------------------------------------------------------------------------
+  def in?(x, y)
+    check_x = x.between?(self.x, self.x+self.width)
+    check_y = y.between?(self.y, self.y+self.height)
+    check_x && check_y
+  end
+  #--------------------------------------------------------------------------
+  # * Mouse include in textfield
+  #--------------------------------------------------------------------------
+  def hover?
+    in?(UI::Mouse.x, UI::Mouse.y)
+  end
+  #--------------------------------------------------------------------------
+  # * Mouse click in textfield
+  #--------------------------------------------------------------------------
+  def clicked?(key)
+    hover? && UI::Mouse.click?(key)
+  end
+end
+
+#==============================================================================
+# ** Game_Screen
+#------------------------------------------------------------------------------
+#  This class handles screen maintenance data, such as changes in color tone,
+# flashes, etc. It's used within the Game_Map and Game_Troop classes.
+#==============================================================================
+
+class Game_Screen
+  #--------------------------------------------------------------------------
+  # * Public Instance Variables
+  #--------------------------------------------------------------------------
+  attr_reader :tone_duration
 end
 
 #==============================================================================
@@ -2134,12 +2609,14 @@ class Scene_Map
   alias extender_start start
   alias extender_update_all_windows update_all_windows
   alias extender_dispose_all_windows dispose_all_windows
+  alias extender_update update
   #--------------------------------------------------------------------------
   # * Start
   #--------------------------------------------------------------------------
   def start
     extender_start
     @textbox = []
+    @old_call_menu = $game_system.menu_disabled
   end
   #--------------------------------------------------------------------------
   # * Update All Windows
@@ -2181,6 +2658,27 @@ class Scene_Map
   def refresh_spriteset
     dispose_spriteset
     create_spriteset
+  end
+  #--------------------------------------------------------------------------
+  # * Frame Update
+  #--------------------------------------------------------------------------
+  def update
+    extender_update
+    if $TEST
+      if UI::Keyboard.trigger?(Configuration::KEY_TONE_MANAGER)
+        if !@tone_manager || @tone_manager.disposed?
+          @old_call_menu = $game_system.menu_disabled
+          $game_system.menu_disabled = true
+          @tone_manager = UI::Form::ToneManager.new(0, 0)
+        else
+          @tone_manager.dispose
+          $game_system.menu_disabled = @old_call_menu
+        end
+      end
+      if @tone_manager && !@tone_manager.disposed?
+        @tone_manager.update
+      end
+     end
   end
 end
 
@@ -3404,9 +3902,17 @@ module Command
   #--------------------------------------------------------------------------
   def mouse_hover_area?(area); area.hover?; end
   #--------------------------------------------------------------------------
+  # * Check mouse 's hover an area (in square)
+  #--------------------------------------------------------------------------
+  def mouse_square_hover_area?(area); area.hover_square?; end
+  #--------------------------------------------------------------------------
   # * Check click an area
   #--------------------------------------------------------------------------
   def mouse_clicked_area?(area, key); area.clicked?(key); end 
+  #--------------------------------------------------------------------------
+  # * Check click an area (square)
+  #--------------------------------------------------------------------------
+  def mouse_square_clicked_area?(area, key); area.clicked_square?(key); end 
     
   #==============================================================================
   # ** User form
