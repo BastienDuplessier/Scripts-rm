@@ -1,5 +1,19 @@
 # FunkyScrolling par s4suk3 et Raho(tsé tung)
-
+=begin
+    Il est possible de définir les valeur de scrolling par défaut dans le module
+    ScrollingConfig.
+    Les types de scrolling sont : :not, :normal, :zelda
+    Vous pouvez ajouter dans la liste de "map_notscrollable" les maps qui ne
+    scrolleront pas.
+    InGame, vous pouvez aussi changer de mode en utilisant les commandes:
+    scroll_type(type,  vitesse), vitesse étant facultatif, si aucun argument
+    vitesse n'est fourni, la commande gardera sa vitesse actuelle ou prendra 
+    celle par défaut.
+    switch_display(x, y), change l'origine de la caméra (pratique si une carte
+    affiche plusieurs environnements et qu'il faut changer de carte dans une 
+    map qui ne scroll pas).
+    Si aucun x ou y n'est fourni, les coordonnées de switch seront 0x0.
+=end
 module ScrollingConfig
     DEFAULT_SPEED = 2
     DEFAULT_TYPE = :not
