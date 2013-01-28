@@ -243,12 +243,4 @@ class Game_Party
 			end
 		end
 	end
-	#--------------------------------------------------------------------------
-	# * Consume Items
-	#    If the specified object is a consumable item, the number in investory
-	#    will be reduced by 1.
-	#--------------------------------------------------------------------------
-	def consume_item(item)
-		lose_item(item, 1) if (item.is_a?(RPG::Item)||item.is_a?(Game_Item)) && item.consumable
-	end
 end
