@@ -25,7 +25,7 @@
 # TI-MAX, Playm, Kmkzy
 #==============================================================================
 
-# This version : 3.6
+# This version : 3.7
 # Official website of the project : http://eventextender.gri.im
 
 #==============================================================================
@@ -39,6 +39,7 @@ module Configuration
   # * Key to launch Tone Manager
   #--------------------------------------------------------------------------
   KEY_TONE_MANAGER = :f3
+  KEY_INGAME_EVAL = :f4
 end
 
 #==============================================================================
@@ -1182,6 +1183,63 @@ module UI
   #==============================================================================
 
   module Form
+    
+    #==============================================================================
+    # ** In Game interpreter
+    #------------------------------------------------------------------------------
+    #  Try command in game
+    #==============================================================================
+    
+    class GameEval
+      #--------------------------------------------------------------------------
+      # * Object initialize
+      #--------------------------------------------------------------------------
+      def initialize
+        y = Graphics.height - 40
+        w = Graphics.width - 80
+        @evalbox = Window_Textfield.new(0, y, w, "", 40, 1)
+        @evalbox.tone.set(20,20,20)
+        @evalbox.active = true
+        @past = Graphical_Rect.new(w, y, 80, 40,100, Color.new(120,120,120), Color.new(0,0,0))
+        @past.draw_text("Make command")
+        @disposed = false
+      end
+      #--------------------------------------------------------------------------
+      # * Update
+      #--------------------------------------------------------------------------
+      def update
+        @evalbox.opacity = (@evalbox.active) ? 255 : 125
+        if Mouse.click?(:mouse_left)
+          @evalbox.active = false
+          @evalbox.active = true if @evalbox.clicked?(:mouse_left)
+        end
+        @evalbox.update
+        if Keyboard.trigger?(:enter)
+          text = @evalbox.value
+          @evalbox.active = false
+          eval(text, $game_map.interpreter.get_binding)
+        end
+        if @past.hover? && UI::Mouse.trigger?(:mouse_left)
+          Win32API.push_in_clipboard(RPG::EventCommand.new(355, 0, [@evalbox.value]))
+          Win32API::MessageBox.(0, "Command push in Clipboard", "Info:", 0)
+        end
+      end
+      #--------------------------------------------------------------------------
+      # * Dispose
+      #--------------------------------------------------------------------------
+      def dispose
+        @evalbox.dispose
+        @past.dispose
+        @disposed = true
+      end
+      #--------------------------------------------------------------------------
+      # * check disposition
+      #--------------------------------------------------------------------------
+      def disposed?
+        @disposed
+      end
+    end
+    
     
     #==============================================================================
     # ** Tone Manager
@@ -2617,6 +2675,7 @@ class Scene_Map
     extender_start
     @textbox = []
     @old_call_menu = $game_system.menu_disabled
+    @flag = :none
   end
   #--------------------------------------------------------------------------
   # * Update All Windows
@@ -2665,19 +2724,32 @@ class Scene_Map
   def update
     extender_update
     if $TEST
-      if UI::Keyboard.trigger?(Configuration::KEY_TONE_MANAGER)
+      if UI::Keyboard.trigger?(Configuration::KEY_INGAME_EVAL) && @flag != :tone
+        @flag = :eval
+        if !@evalIG || @evalIG.disposed?
+          @old_call_menu = $game_system.menu_disabled
+          $game_system.menu_disabled = true
+          @evalIG = UI::Form::GameEval.new
+        else
+          @flag = :none
+          @evalIG.dispose
+          $game_system.menu_disabled = @old_call_menu
+        end
+      end
+      if UI::Keyboard.trigger?(Configuration::KEY_TONE_MANAGER) && @flag != :eval
+        @flag = :tone
         if !@tone_manager || @tone_manager.disposed?
           @old_call_menu = $game_system.menu_disabled
           $game_system.menu_disabled = true
           @tone_manager = UI::Form::ToneManager.new(0, 0)
         else
+          @flag = :none
           @tone_manager.dispose
           $game_system.menu_disabled = @old_call_menu
         end
       end
-      if @tone_manager && !@tone_manager.disposed?
-        @tone_manager.update
-      end
+      @tone_manager.update if @flag == :tone
+      @evalIG.update if @flag == :eval
      end
   end
 end
@@ -2698,6 +2770,7 @@ class Game_Map
   # * Public instance variable
   #--------------------------------------------------------------------------
   attr_accessor :parallaxes, :parallax_x, :parallax_y
+  attr_accessor :interpreter
   #--------------------------------------------------------------------------
   # * Object Initialization
   #--------------------------------------------------------------------------
@@ -2919,6 +2992,12 @@ class Game_Interpreter
   #--------------------------------------------------------------------------
   include CommandAPI
   include Command
+  #--------------------------------------------------------------------------
+  # * Get Binding
+  #--------------------------------------------------------------------------
+  def get_binding
+    return binding
+  end
 end
 
 #==============================================================================
