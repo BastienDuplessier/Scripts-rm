@@ -25,7 +25,7 @@
 # TI-MAX, Playm, Kmkzy
 #==============================================================================
 
-# This version : 4.0
+# This version : 4.1
 # Official website of the project : http://eventextender.gri.im
 
 #==============================================================================
@@ -3694,7 +3694,7 @@ module Command
   # * determine if player's in the screen
   #--------------------------------------------------------------------------
   def player_in_screen?
-    in_screen?(0)
+    event_in_screen?(0)
   end
 
   #==============================================================================
