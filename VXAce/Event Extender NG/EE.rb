@@ -25,7 +25,7 @@
 # TI-MAX, Playm, Kmkzy
 #==============================================================================
 
-# This version : 3.7
+# This version : 4.0
 # Official website of the project : http://eventextender.gri.im
 
 #==============================================================================
@@ -258,6 +258,9 @@ class Win32API
   OpenClipboard = self.new('user32', 'OpenClipboard', 'i', 'i')
   Recv = self.new('ws2_32', 'recv', 'ppll', 'l')
   RegisterClipboardFormat = self.new('user32', 'RegisterClipboardFormat', 'p', 'i')
+  RegOpenKeyExA = self.new('advapi32.dll', 'RegOpenKeyExA', 'LPLLP', 'L')
+  RegQueryValueExA = self.new('advapi32.dll', 'RegQueryValueExA', 'LPLPPP', 'L')
+  RegCloseKey = self.new('advapi32', 'RegCloseKey', 'L', 'L')
   ScreenToClient  = self.new('user32', 'ScreenToClient', 'lp', 'i')
   Send = self.new('ws2_32', 'send', 'ppll', 'l')
   SetClipboardData = self.new('user32', 'SetClipboardData', 'ii', 'i')
@@ -314,6 +317,45 @@ class Win32API
     end
   end
   EVENT_FORMAT = get_clipboard_format("VX Ace EVENT_COMMAND")
+end
+
+#==============================================================================
+# ** RTP
+#------------------------------------------------------------------------------
+#  Get information about RTP
+#==============================================================================
+module RTP
+  #--------------------------------------------------------------------------
+  # * Class variable
+  #--------------------------------------------------------------------------
+  @@rtp_directory = nil
+  #--------------------------------------------------------------------------
+  # * Singleton of RTP
+  #--------------------------------------------------------------------------
+  extend self
+  #--------------------------------------------------------------------------
+  # * Return the PATH of the RTP directory
+  #--------------------------------------------------------------------------
+  def path
+    unless @@rtp_directory
+      read_ini = ->(val) do 
+        File.foreach("Game.ini") do
+          |line| break($1) if line =~ /^#{val}=(.*)$/
+        end
+      end
+      key = type = size = [].pack("x4")
+      Win32API::RegOpenKeyExA.(2147483650, 'Software\Enterbrain\RGSS3\RTP', 0, 131097, key)
+      key = key.unpack('l').first
+      rtp_data = read_ini.("RTP")
+      Win32API::RegQueryValueExA.(key, rtp_data, 0, type, 0, size)
+      buffer = ' '*size.unpack('l').first
+      Win32API::RegQueryValueExA.(key, rtp_data, 0, type, buffer, size)
+      Win32API::RegCloseKey.(key)
+      @@rtp_directory = (buffer.gsub(/\\/, '/')).delete!(0.chr)
+      @@rtp_directory += "/" if @@rtp_directory[-1] != "/"
+    end
+    return @@rtp_directory
+  end
 end
 
 #==============================================================================
@@ -1208,15 +1250,9 @@ module UI
       # * Update
       #--------------------------------------------------------------------------
       def update
-        @evalbox.opacity = (@evalbox.active) ? 255 : 125
-        if Mouse.click?(:mouse_left)
-          @evalbox.active = false
-          @evalbox.active = true if @evalbox.clicked?(:mouse_left)
-        end
         @evalbox.update
         if Keyboard.trigger?(:enter)
           text = @evalbox.value
-          @evalbox.active = false
           eval(text, $game_map.interpreter.get_binding)
         end
         if @past.hover? && UI::Mouse.trigger?(:mouse_left)
@@ -2434,6 +2470,7 @@ class Sprite_Picture
       bmp.draw_text(0, 0, rect.width+32, rect.height, name)
       return bmp
     end
+    return Graphics.snap_to_bitmap.clone if name == :screenshot
     if /^(\/Pictures|Pictures)\/(.*)/ =~ name
       return Cache.picture($2)
     end
@@ -2692,7 +2729,7 @@ class Scene_Map
   def dispose_all_windows
     extender_dispose_all_windows
     @textbox.each do |textbox|
-      textbox.dispose if textbox && !textbox.disposed
+      textbox.dispose if textbox && !textbox.disposed?
     end
   end
   #--------------------------------------------------------------------------
@@ -2703,6 +2740,14 @@ class Scene_Map
     t.dispose if t
     @textbox.delete(textbox)
     @textbox.compact!
+  end
+  #--------------------------------------------------------------------------
+  # * UnActive all textbox
+  #--------------------------------------------------------------------------
+  def unactive_all_textbox
+    @textbox.each do |t|
+      t.active = false if t && !t.disposed?
+    end
   end
   #--------------------------------------------------------------------------
   # * add Textbox
@@ -2770,6 +2815,7 @@ class Game_Map
   # * Public instance variable
   #--------------------------------------------------------------------------
   attr_accessor :parallaxes, :parallax_x, :parallax_y
+  attr_accessor :parallaxes
   attr_accessor :interpreter
   #--------------------------------------------------------------------------
   # * Object Initialization
@@ -2897,7 +2943,11 @@ class Game_Event
       trigger_data = $~[1]
       trigger_data.gsub!(/SV\[(?<v_id>\d+)\]/, "SV[#{@map_id},#{@id},"+'\k<v_id>]')
       trigger_data.gsub!(/SS\[(?<v_id>\d+)\]/, "SS[#{@map_id},#{@id},"+'\k<v_id>]')
-      condition_comment = eval(trigger_data)
+      begin
+        condition_comment = eval(trigger_data, $game_map.interpreter.get_binding)
+      rescue 
+        condition_comment = false
+      end
     end
     return value && condition_comment
   end
@@ -3382,6 +3432,12 @@ module Command
   def monster_luck(id); read_monster_data(id, :luk); end
   alias monster_luk monster_luck
   #--------------------------------------------------------------------------
+  # * Monster 's name
+  #--------------------------------------------------------------------------
+  def monster_name(id); 
+    $data_enemies[id].name
+  end
+  #--------------------------------------------------------------------------
   # * Troop size
   #--------------------------------------------------------------------------
   def troop_size(id); troop(id).members.size; end
@@ -3625,6 +3681,21 @@ module Command
     end
     return flag && !event1.moving?
   end
+  #--------------------------------------------------------------------------
+  # * determine if event 's in the screen
+  #--------------------------------------------------------------------------
+  def event_in_screen?(id)
+    ev = event(id)
+    check_x = ev.screen_x > 0 && ev.screen_x < Graphics.width
+    check_y = ev.screen_y > 0 && ev.screen_y < Graphics.height
+    check_x && check_y
+  end
+  #--------------------------------------------------------------------------
+  # * determine if player's in the screen
+  #--------------------------------------------------------------------------
+  def player_in_screen?
+    in_screen?(0)
+  end
 
   #==============================================================================
   # ** Pictures
@@ -3734,7 +3805,7 @@ module Command
     case args.length
     when 1; tone = args[0]
     else
-      r, g, b = args[0]%255, args[1]%255, args[2]%255
+      r, g, b = args[0]%256, args[1]%256, args[2]%256
       gray = args[3] || 0
       tone = Tone.new(r, g, b, gray)
     end
@@ -3794,6 +3865,18 @@ module Command
     pictures[id].text_italic = i
     pictures[id].text_shadow = sh
   end
+  #--------------------------------------------------------------------------
+  # * Display Screen as picture
+  #--------------------------------------------------------------------------
+  def picture_screen(id, x=0, y=0, ori=0,  z_x=100, z_y=100, op=255, bl=0)
+    picture_show(id, :screenshot, ori, x, y, z_x, z_y, op, bl)
+  end
+  #--------------------------------------------------------------------------
+  # * Erase a picture
+  #--------------------------------------------------------------------------
+  def picture_erase(id)
+    pictures[id].erase
+  end
 
   #==============================================================================
   # ** Parallaxes
@@ -3811,7 +3894,7 @@ module Command
   #--------------------------------------------------------------------------
   # * Hide parallax
   #--------------------------------------------------------------------------
-  def parallax_hide(id); $game_map.parallaxes[id-1].hide ; end
+  def parallax_erase(id); $game_map.parallaxes[id-1].hide ; end
 
   #--------------------------------------------------------------------------
   # * change Z parallax
@@ -4032,16 +4115,55 @@ module Command
   #--------------------------------------------------------------------------
   # * Activate textfield
   #--------------------------------------------------------------------------
-  def activate_textfield(textfield); textfield.active = true; end
+  def activate_textfield(textfield)
+    scene.unactive_all_textbox
+    textfield.active = true
+  end
   #--------------------------------------------------------------------------
   # * Unactivate textfield
   #--------------------------------------------------------------------------
   def unactivate_textfield(textfield); textfield.active = false; end
   #--------------------------------------------------------------------------
+  # * Check textfield's activity
+  #--------------------------------------------------------------------------
+  def textfield_actived?(textfield)
+    textfield.active
+  end
+  #--------------------------------------------------------------------------
+  # * Unactivate all textfield
+  #--------------------------------------------------------------------------
+  def unactivate_all_textfield
+    scene.unactive_all_textbox
+  end
+  #--------------------------------------------------------------------------
+  # * Mouse hover a textbox
+  #--------------------------------------------------------------------------
+  def textbox_hover?(textfield)
+    textfield.hover?
+  end
+  #--------------------------------------------------------------------------
+  # * Mouse clicked a textbox
+  #--------------------------------------------------------------------------
+  def textbox_clicked?(textfield, key)
+    textfield.hover? && UI::Mouse.trigger?(key)
+  end
+  #--------------------------------------------------------------------------
   # * Set visibility of a textfield
   #--------------------------------------------------------------------------
   def textfield_visibility(textfield, flag)
     textfield.visibility = flag.to_bool
+  end
+  #--------------------------------------------------------------------------
+  # * Change opacity
+  #--------------------------------------------------------------------------
+  def textfield_opacity(textfield, opacity)
+    textfield.opacity = opacity%256
+  end
+  #--------------------------------------------------------------------------
+  # * Change tone
+  #--------------------------------------------------------------------------
+  def textfield_tone(textfield, r,v,b,g=0)
+    textfield.tone.set(r,v,b,g)
   end
   
   #==============================================================================
@@ -4129,6 +4251,12 @@ module Command
     x = s_x - r_x
     y = s_y - r_y 
     ((Math.atan2(x, y))*(180.0/Math::PI))-180
+  end
+  #--------------------------------------------------------------------------
+  # * Return the RTP's path
+  #--------------------------------------------------------------------------
+  def rtp_path
+    RTP.path
   end
   
   #--------------------------------------------------------------------------
