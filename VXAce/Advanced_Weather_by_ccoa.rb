@@ -428,8 +428,8 @@ class Spriteset_Weather
       if @type == 1 or @type == 5 or @type == 13 or @type == 27 or @type == 28 or @type == 36 or @type == 39 or @type == 40 or @type == 42 or @type == 43 or @type == 46 #rain
         if sprite.opacity <= 150
           if @current_pose[i] == 0
-            sprite.y += @rain_bitmap.Graphics.height
-            sprite.x -= @rain_bitmap.Graphics.width
+            sprite.y += @rain_bitmap.height
+            sprite.x -= @rain_bitmap.width
             if @type == 1 or @type == 5
               sprite.bitmap = @rain_splash
             else
