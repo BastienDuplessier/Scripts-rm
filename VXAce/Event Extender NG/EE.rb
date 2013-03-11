@@ -39,6 +39,9 @@ module Configuration
   # * Key to launch Tone Manager
   #--------------------------------------------------------------------------
   KEY_TONE_MANAGER = :f3
+  #--------------------------------------------------------------------------
+  # * Key to launch In Game Eval
+  #--------------------------------------------------------------------------
   KEY_INGAME_EVAL = :f4
 end
 
@@ -1253,7 +1256,11 @@ module UI
         @evalbox.update
         if Keyboard.trigger?(:enter)
           text = @evalbox.value
-          eval(text, $game_map.interpreter.get_binding)
+          begin
+            eval(text, $game_map.interpreter.get_binding)
+          rescue
+            msgbox("Error in the command line")
+          end
         end
         if @past.hover? && UI::Mouse.trigger?(:mouse_left)
           Win32API.push_in_clipboard(RPG::EventCommand.new(355, 0, [@evalbox.value]))
@@ -3232,6 +3239,12 @@ module Command
   def unflash_square(*c)
     flash_square(*c, 0, 0, 0)
   end
+  #--------------------------------------------------------------------------
+  # * Check passability
+  #--------------------------------------------------------------------------
+  def square_passable?(x, y, d=2)
+    $game_map.passable?(x, y, d)
+  end
 
   #==============================================================================
   # ** System
@@ -3669,7 +3682,7 @@ module Command
   #--------------------------------------------------------------------------
   # * determine collision (ev1 with ev2)
   #--------------------------------------------------------------------------
-  def collide(ev1, ev2)
+  def collide?(ev1, ev2)
     event1 = event(ev1)
     event2 = event(ev2)
     flag = case event1.direction
@@ -4138,13 +4151,13 @@ module Command
   #--------------------------------------------------------------------------
   # * Mouse hover a textbox
   #--------------------------------------------------------------------------
-  def textbox_hover?(textfield)
+  def textfield_hover?(textfield)
     textfield.hover?
   end
   #--------------------------------------------------------------------------
   # * Mouse clicked a textbox
   #--------------------------------------------------------------------------
-  def textbox_clicked?(textfield, key)
+  def textfield_clicked?(textfield, key)
     textfield.hover? && UI::Mouse.trigger?(key)
   end
   #--------------------------------------------------------------------------
