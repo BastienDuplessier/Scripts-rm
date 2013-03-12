@@ -87,19 +87,63 @@ class Object
   # * check type : bool
   #--------------------------------------------------------------------------
   def boolean?
-    self.is_a?(TrueClass) || self.is_a?(FalseClass)
+    return false
   end
   #--------------------------------------------------------------------------
   # * Convert in Bool
   #--------------------------------------------------------------------------
   def to_bool
-    return self if boolean?
     return (self != 0) if self.is_a?(Numeric)
     return !(self.downcase == "false") if self.is_a?(String)
     return !(self == :false) if self.is_a?(Symbol)
     return true
   end
 end
+
+#==============================================================================
+# ** FalseClass
+#------------------------------------------------------------------------------
+#  The false class. false is the only instance of the FalseClass class. 
+#  false, like nil, denotes a FALSE condition, while all other objects are TRUE.
+#==============================================================================
+
+class FalseClass
+  #--------------------------------------------------------------------------
+  # * check type : bool
+  #--------------------------------------------------------------------------
+  def boolean?
+    return true
+  end
+  #--------------------------------------------------------------------------
+  # * Convert in Bool
+  #--------------------------------------------------------------------------
+  def to_bool
+    return false
+  end
+end
+
+#==============================================================================
+# ** TrueClass
+#------------------------------------------------------------------------------
+#  The true class. true is the only instance of the TrueClass class. 
+#  true is a representative object that denotes a TRUE condition.
+#==============================================================================
+
+class TrueClass
+  #--------------------------------------------------------------------------
+  # * check type : bool
+  #--------------------------------------------------------------------------
+  def boolean?
+    return true
+  end
+  #--------------------------------------------------------------------------
+  # * Convert in Bool
+  #--------------------------------------------------------------------------
+  def to_bool
+    return true
+  end
+end
+
 
 #==============================================================================
 # ** Enumerable
