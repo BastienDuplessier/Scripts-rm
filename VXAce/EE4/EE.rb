@@ -95,9 +95,8 @@ class Object
   def to_bool
     return self if boolean?
     return (self != 0) if self.is_a?(Numeric)
-    return !(self == "false") if self.is_a?(String)
+    return !(self.downcase == "false") if self.is_a?(String)
     return !(self == :false) if self.is_a?(Symbol)
-    return !(self.empty?) if self.respond_to?(:empty?)
     return true
   end
 end
