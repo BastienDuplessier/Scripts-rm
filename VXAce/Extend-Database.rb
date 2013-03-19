@@ -2,7 +2,7 @@
 # http://www.biloucorp.com
 
 # Idea : Avygeil, Grim 
-# Thanks to Hiino, Zangther (sex 's motivating)
+# Thanks to Hiino, Zangther (sexual motivation)
 # And special thanks to larabdubled
 
 
@@ -14,14 +14,14 @@
 
 class Object
   #--------------------------------------------------------------------------
-  # * Bool cast
+  # * Bool casting
   #--------------------------------------------------------------------------
   if defined?(Command)
     remove_const(:Database)
     def to_bool; (self != nil || self != false) end 
   end
   #--------------------------------------------------------------------------
-  # * Polymorphic cast
+  # * Polymorphic casting
   #--------------------------------------------------------------------------
   def nothing; self; end
 end
@@ -37,7 +37,7 @@ module Database
   #==============================================================================
   # ** Types
   #------------------------------------------------------------------------------
-  # Design the Type's System
+  # Implements the Type System
   #==============================================================================
   
   module Type
@@ -52,34 +52,34 @@ module Database
       polymorphic:  [:nothing, ""]
     }
     #--------------------------------------------------------------------------
-    # * String's representation
+    # * String representation
     #--------------------------------------------------------------------------
     def string(field_name)
       handle_field(:string, field_name.to_sym)
     end
     alias :text :string
     #--------------------------------------------------------------------------
-    # * Integer's representation
+    # * Integer representation
     #--------------------------------------------------------------------------
     def integer(field_name)
       handle_field(:integer, field_name.to_sym)
     end
     alias :int :integer
     #--------------------------------------------------------------------------
-    # * String's representation
+    # * String representation
     #--------------------------------------------------------------------------
     def float(field_name)
       handle_field(:float, field_name.to_sym)
     end
     #--------------------------------------------------------------------------
-    # * String's representation
+    # * String representation
     #--------------------------------------------------------------------------
     def boolean(field_name)
       handle_field(:boolean, field_name.to_sym)
     end
     alias :bool :boolean
     #--------------------------------------------------------------------------
-    # * String's representation
+    # * String representation
     #--------------------------------------------------------------------------
     def polymorphic(field_name)
       handle_field(:polymorphic, field_name.to_sym)
@@ -95,7 +95,7 @@ module Database
   
   class Table
     #--------------------------------------------------------------------------
-    # * Append Type handler
+    # * Appends Type handler
     #--------------------------------------------------------------------------
     extend Type
     Types = Type::Types
@@ -104,11 +104,11 @@ module Database
     #--------------------------------------------------------------------------
     class << self
       #--------------------------------------------------------------------------
-      # * Public instance variable
+      # * Public instance variables
       #--------------------------------------------------------------------------
       attr_accessor :fields
       #--------------------------------------------------------------------------
-      # * Handle Field
+      # * Field handling
       #--------------------------------------------------------------------------
       def handle_field(type, name)
         @fields ||= Hash.new
@@ -126,7 +126,7 @@ module Database
       end
     end
     #--------------------------------------------------------------------------
-    # * Object initialize
+    # * Object initialization
     #--------------------------------------------------------------------------
     def initialize(hash)
       hash.each do |key, value|
@@ -144,7 +144,7 @@ module Database
   #--------------------------------------------------------------------------
   class << self
     #--------------------------------------------------------------------------
-    # * Public instance variable
+    # * Public instance variables
     #--------------------------------------------------------------------------
     attr_accessor :tables
     #--------------------------------------------------------------------------
@@ -161,7 +161,7 @@ module Database
 end
 
 #==============================================================================
-# ** Event Extender 4 Implantation
+# ** Junction with the Event Extender 4
 #==============================================================================
 if defined?(Command)
   #==============================================================================
@@ -172,7 +172,7 @@ if defined?(Command)
   
   module T
     #--------------------------------------------------------------------------
-    # * Get a table
+    # * Get table
     #--------------------------------------------------------------------------
     def [](name); Database.tables[name.to_sym]; end
   end
