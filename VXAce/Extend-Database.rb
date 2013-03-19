@@ -58,7 +58,6 @@ module Database
     "Weapons",
     "Armors",
     "Enemies",
-    "Enemies",
     "States",
     "Animations",
     "Tilesets",
