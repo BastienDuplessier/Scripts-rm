@@ -2,7 +2,7 @@
 # http://www.biloucorp.com
 
 # Idea : Avygeil, Grim 
-# Thanks to Hiino, Zangther (sex 's motivating)
+# Thanks to Hiino, Zangther (sexual motivation)
 # And special thanks to larabdubled
 
 
@@ -14,14 +14,14 @@
 
 class Object
   #--------------------------------------------------------------------------
-  # * Bool cast
+  # * Bool casting
   #--------------------------------------------------------------------------
   if defined?(Command)
     remove_const(:Database)
     def to_bool; (self != nil || self != false) end 
   end
   #--------------------------------------------------------------------------
-  # * Polymorphic cast
+  # * Polymorphic casting
   #--------------------------------------------------------------------------
   def nothing; self; end
   #--------------------------------------------------------------------------
@@ -47,7 +47,7 @@ module Database
   #==============================================================================
   # ** Types
   #------------------------------------------------------------------------------
-  # Design the Type's System
+  # Implements the Type System
   #==============================================================================
   
   RPGDatas = [
@@ -77,34 +77,34 @@ module Database
       polymorphic:  [:nothing, ""]
     }
     #--------------------------------------------------------------------------
-    # * String's representation
+    # * String representation
     #--------------------------------------------------------------------------
     def string(field_name)
       handle_field(:string, field_name.to_sym)
     end
     alias :text :string
     #--------------------------------------------------------------------------
-    # * Integer's representation
+    # * Integer representation
     #--------------------------------------------------------------------------
     def integer(field_name)
       handle_field(:integer, field_name.to_sym)
     end
     alias :int :integer
     #--------------------------------------------------------------------------
-    # * String's representation
+    # * Floating point number representation
     #--------------------------------------------------------------------------
     def float(field_name)
       handle_field(:float, field_name.to_sym)
     end
     #--------------------------------------------------------------------------
-    # * String's representation
+    # * Boolean representation
     #--------------------------------------------------------------------------
     def boolean(field_name)
       handle_field(:boolean, field_name.to_sym)
     end
     alias :bool :boolean
     #--------------------------------------------------------------------------
-    # * String's representation
+    # * Polymorphic type representation
     #--------------------------------------------------------------------------
     def polymorphic(field_name)
       handle_field(:polymorphic, field_name.to_sym)
@@ -130,7 +130,7 @@ module Database
   
   class Table
     #--------------------------------------------------------------------------
-    # * Append Type handler
+    # * Appends Type handler
     #--------------------------------------------------------------------------
     extend Type
     Types = Type::Types
@@ -139,12 +139,12 @@ module Database
     #--------------------------------------------------------------------------
     class << self
       #--------------------------------------------------------------------------
-      # * Public instance variable
+      # * Public instance variables
       #--------------------------------------------------------------------------
       attr_accessor :fields
       attr_accessor :classname
       #--------------------------------------------------------------------------
-      # * Handle Field
+      # * Field handling
       #--------------------------------------------------------------------------
       def handle_field(type, name)
         @classname ||= self.to_s.to_sym
@@ -154,7 +154,7 @@ module Database
         send(:attr_accessor, name)
       end
       #--------------------------------------------------------------------------
-      # * Inline Insertion
+      # * Inline insertion
       #--------------------------------------------------------------------------
       def insert(*args)
         keys = @fields.keys
@@ -163,7 +163,7 @@ module Database
       end
     end
     #--------------------------------------------------------------------------
-    # * Object initialize
+    # * Object initialization
     #--------------------------------------------------------------------------
     def initialize(hash)
       hash.each do |key, value|
@@ -181,7 +181,7 @@ module Database
   #--------------------------------------------------------------------------
   class << self
     #--------------------------------------------------------------------------
-    # * Public instance variable
+    # * Public instance variables
     #--------------------------------------------------------------------------
     attr_accessor :tables
     #--------------------------------------------------------------------------
@@ -200,7 +200,7 @@ end
 
 
 #==============================================================================
-# ** Event Extender 4 Implantation
+# ** Junction with the Event Extender 4
 #==============================================================================
 if defined?(Command)
   #==============================================================================
@@ -220,7 +220,7 @@ end
 #==============================================================================
 # ** RPG::Module Mapping
 #------------------------------------------------------------------------------
-#  Initiale Database Mapping
+#  Initial Database Mapping
 #==============================================================================
 
 Database::RPGDatas.each do |data|
