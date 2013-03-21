@@ -16,7 +16,7 @@
 # - Zangther (Some various help and Regexp)
 # - Lidenvice (Help for test and ergonomic reflection and proofreading)
 # - Ulis (proofreading)
-# - Hiino ♥ (proofreading and translation)
+# - Hiino ♥ 
 #------------------------------------------------------------------------------
 # And for their social and technic help:
 # Magi, Hiino, XHTMLBoy, Raho, Joke, Al Rind, Testament, 
