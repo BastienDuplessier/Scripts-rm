@@ -188,26 +188,40 @@ class Spriteset_Weather
     for image in @sparkle_bitmaps
       image.dispose
     end
-    for image in @flame_meteor_bitmaps
-      image.dispose
+    if @flame_meteor_bitmaps
+      for image in @flame_meteor_bitmaps
+        image.dispose
+      end
     end
-    for image in @waterbomb_bitmaps
-      image.dispose
+    if @waterbom_bitmaps
+      for image in @waterbomb_bitmaps
+        image.dispose
+      end
     end
-    for image in @icybomb_bitmaps
-      image.dispose
+    if @icybomb_bitmaps
+      for image in @icybomb_bitmaps
+        image.dispose
+      end
     end
-    for image in @flarebomb_bitmaps
-      image.dispose
+    if @flarebomb_bitmaps
+      for image in @flarebomb_bitmaps
+        image.dispose
+      end
     end
-    for image in @starburst_bitmaps
-      image.dispose
+    if @starburst_bitmaps
+      for image in @starburst_bitmaps
+        image.dispose
+      end
     end
-    for image in @monostarburst_bitmaps
-      image.dispose
+    if @monostarburst_bitmaps
+      for image in @monostarburst_bitmaps
+        image.dispose
+      end
     end
-    for image in @user_bitmaps
-      image.dispose
+    if @user_bitmaps
+      for image in @user_bitmaps
+        image.dispose
+      end
     end
     $WEATHER_UPDATE = true
   end
