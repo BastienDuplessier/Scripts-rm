@@ -30,8 +30,10 @@ module UI
     # * Eval
     #--------------------------------------------------------------------------
     def eval(passed_method)
-      resp_a = (@a.is_a?(Combination)) ? @a.eval(passed_method) : Keyboard.send(passed_method, @a)
-      resp_b = (@b.is_a?(Combination)) ? @b.eval(passed_method) : Keyboard.send(passed_method, @b)
+      resp_a = (@a.is_a?(Combination)) ? 
+        @a.eval(passed_method) : Keyboard.send(passed_method, @a)
+      resp_b = (@b.is_a?(Combination)) ? 
+        @b.eval(passed_method) : Keyboard.send(passed_method, @b)
       return resp_a && resp_b if @operator == :&
       resp_a || resp_b
     end
