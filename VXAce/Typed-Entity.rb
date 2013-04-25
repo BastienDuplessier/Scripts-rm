@@ -61,6 +61,8 @@
   commande["truc"].coercion(:int_list)
   commande["other"]["cout_hp"].coercion(:int)
   Les appels de ces valeurs seront typés (en float, liste d'entier et entier).
+  =============
+  Il est aussi possible d'utiliser .entities pour récupérer une entitée
 =end  
 
 #==============================================================================
@@ -216,6 +218,10 @@ class String
     end
     command_list
   end
+  #--------------------------------------------------------------------------
+  # * Alias
+  #--------------------------------------------------------------------------
+  alias entities to_cmd_list
 end
 
 #==============================================================================
