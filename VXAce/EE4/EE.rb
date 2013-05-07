@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #==============================================================================
 # ** The Event Extender
 #------------------------------------------------------------------------------
@@ -16,7 +17,7 @@
 # - Zangther (Some various help and Regexp)
 # - Lidenvice (Help for test and ergonomic reflection and proofreading)
 # - Ulis (proofreading)
-# - Hiino ♥ 
+# - Hiino ♥ (proofreading and translation)
 #------------------------------------------------------------------------------
 # And for their social and technic help:
 # Magi, Hiino, XHTMLBoy, Raho, Joke, Al Rind, Testament, 
@@ -25,7 +26,7 @@
 # TI-MAX, Playm, Kmkzy
 #==============================================================================
 
-# This version : 4.1
+# This version : 4.3
 # Official website of the project : http://eventextender.gri.im
 
 #==============================================================================
@@ -52,6 +53,19 @@ end
 #==============================================================================
 
 module Command
+  #--------------------------------------------------------------------------
+  # * Singleton
+  #--------------------------------------------------------------------------
+  extend self
+end
+
+#==============================================================================
+# ** Command_Description
+#------------------------------------------------------------------------------
+# Description of commands
+#==============================================================================
+
+module Command_Description
   #--------------------------------------------------------------------------
   # * Singleton
   #--------------------------------------------------------------------------
@@ -370,6 +384,7 @@ end
 #------------------------------------------------------------------------------
 #  Get information about RTP
 #==============================================================================
+
 module RTP
   #--------------------------------------------------------------------------
   # * Class variable
@@ -614,7 +629,13 @@ module V
   # * Modifies a variable
   #--------------------------------------------------------------------------
   def []=(key, value)
-    $game_variables[key] = value
+    if key.is_a?(Range)
+      key.each do |k|
+        $game_variables[k] = value
+      end
+    else
+      $game_variables[key] = value
+    end
   end
 end
 
@@ -639,7 +660,13 @@ module S
   # * Modifies a Game Switch
   #--------------------------------------------------------------------------
   def []=(key, value)
-    $game_switches[key] = value.to_bool
+    if key.is_a?(Range)
+      key.each do |k|
+        $game_variables[k] = value.to_bool
+      end
+    else
+      $game_variables[key] = value.to_bool
+    end
   end
 end
 
@@ -2977,10 +3004,17 @@ class Game_Event
   # * Alias
   #--------------------------------------------------------------------------
   alias extender_conditions_met? conditions_met?
+  alias extender_update update
   #--------------------------------------------------------------------------
   # * Public instance variables
   #--------------------------------------------------------------------------
   attr_accessor :id
+  #--------------------------------------------------------------------------
+  # * Singleton
+  #--------------------------------------------------------------------------
+  class << self
+    attr_accessor :last_clicked_event
+  end
   #--------------------------------------------------------------------------
   # * Determine if Event Page Conditions Are Met
   #--------------------------------------------------------------------------
@@ -3014,6 +3048,39 @@ class Game_Event
       index += 1
     end
     return list.collect{|line|line+=" "}.join
+  end
+  #--------------------------------------------------------------------------
+  # * Frame Update
+  #--------------------------------------------------------------------------
+  def update
+    extender_update
+    if cmd(:mouse_clicked_event?, @id, :mouse_left)
+      Game_Event.last_clicked_event = @id 
+    end
+  end
+end
+
+#==============================================================================
+# ** Game_Player
+#------------------------------------------------------------------------------
+#  This class handles the player. It includes event starting determinants and
+# map scrolling functions. The instance of this class is referenced by
+# $game_player.
+#==============================================================================
+
+class Game_Player
+  #--------------------------------------------------------------------------
+  # * Alias
+  #--------------------------------------------------------------------------
+  alias extender_update update
+  #--------------------------------------------------------------------------
+  # * Frame Update
+  #--------------------------------------------------------------------------
+  def update
+    extender_update
+    if cmd(:mouse_clicked_event?, 0, :mouse_left)
+      Game_Event.last_clicked_event = 0
+    end
   end
 end
 
@@ -3576,6 +3643,10 @@ module Command
   # * Determine if mouse 's hover the player
   #--------------------------------------------------------------------------
   def mouse_hover_player?; event(0).hover?; end
+  #--------------------------------------------------------------------------
+  # * Return ID of the last clicked event
+  #--------------------------------------------------------------------------
+  def last_clicked_event; Game_Event.last_clicked_event; end
   #--------------------------------------------------------------------------
   # * Determine if the player is clicked
   #--------------------------------------------------------------------------
