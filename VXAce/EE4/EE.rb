@@ -1030,6 +1030,7 @@ module UI
     define_keys :num_lock, :scroll_lock, :lshift, :rshift, :lcontrol, :rcontrol
     define_keys :lmenu, :rmenu, :circumflex, :dollar, :close_parenthesis, :u_grav
     define_keys :square, :less_than, :colon, :semicolon, :equal, :comma, :minus
+    define_keys :delete, :snapshot, :insert
     #--------------------------------------------------------------------------
     # * Class Variables
     #--------------------------------------------------------------------------
