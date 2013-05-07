@@ -841,7 +841,10 @@ module UI
     Keys[:down] = 0x28
     Keys[:select] = 0x29
     Keys[:print] = 0x2A
+    Keys[:snapshot] = 0x2C
     Keys[:execute] = 0x2B
+    Keys[:insert] = 0x2D
+    Keys[:delete] = 0x2E
     Keys[:help] = 0x2F
     Keys[:zero] = 0x30
     Keys[:one] = 0x31
