@@ -20,7 +20,7 @@ module Reflect_Config
   #--------------------------------------------------------------------------
   def maps_behaviour
     list = {}
-    # Liste des maps avec un comportomment spécifique pour le héros
+    # Liste des maps avec un comportemment spécifique pour le héros
     # Par exemple: list[3] = :fix donnera un reflet non ondulant au héros sur la map 3
     # Liste des possibilités:
     # - :ondulate -> ondule légèrement
