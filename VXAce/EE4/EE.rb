@@ -4489,7 +4489,7 @@ module Command_Description
     {description:"Renvoi l'argent possédé par l'équipe", returnable: true}
   end
   def steps
-    {description:"Renvoi l'id de la map jouée", returnable: true}
+    {description:"Renvoi le nombre de pas effectué par l'équipe", returnable: true}
   end
   def play_time
     {description:"Renvoi la durée de la partie", returnable: true}
