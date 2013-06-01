@@ -5175,9 +5175,9 @@ module Command_Description
     {description:"Crée un champs saisissable au clavier", 
       args:[
         {name:"Type de contenu", type: :enum, enum:[:integer, :float, :text]},
-        {name:"X", type: :integer},
-        {name:"Y", type: :integer},
-        {name:"Largeur", type: :integer, default: 200},
+        {name:"X", type: :int},
+        {name:"Y", type: :int},
+        {name:"Largeur", type: :int, default: 200},
         {name:"Texte par défaut", type: :string},
         {name:"Alignement", type: :enum, enum:[:left, :center, :right]}
         ],
