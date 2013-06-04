@@ -25,7 +25,7 @@
 # TI-MAX, Playm, Kmkzy
 #==============================================================================
 
-# This version : 4.5.2
+# This version : 4.5.3
 # Official website of the project : http://eventextender.gri.im
 
 #==============================================================================
@@ -308,11 +308,13 @@ class Win32API
   GlobalAlloc = self.new('kernel32', 'GlobalAlloc', 'ii', 'i')
   GlobalFree = self.new('kernel32', 'GlobalFree', 'i', 'i')
   GlobalLock = self.new('kernel32', 'GlobalLock', 'i', 'l')
+  GlobalSize = self.new('kernel32', 'GlobalSize', 'l', 'l')
+  GlobalUnlock = self.new('kernel32', 'GlobalUnlock', 'l', 'v')
   Htons = self.new('ws2_32', 'htons', 'l', 'l')
   Inet_Addr = self.new('ws2_32', 'inet_addr', 'p', 'l')
   MapVirtualKey = self.new('user32', 'MapVirtualKey', 'ii', 'i')
   MessageBox = self.new('user32','MessageBox','lppl','i')
-  Memcpy = self.new('msvcrt','memcpy', 'ipi', 'i')
+  Memcpy = self.new('msvcrt','memcpy', 'ppi', 'i')
   MultiByteToWideChar = self.new('kernel32', 'MultiByteToWideChar', 'ilpipi', 'i')
   OpenClipboard = self.new('user32', 'OpenClipboard', 'i', 'i')
   PeekMessage = self.new('user32', 'PeekMessage', 'piiii', 'i')
@@ -355,6 +357,21 @@ class Win32API
       second_buffer.delete!("\000") if to == 65001
       second_buffer.delete!("\x00") if to == 0
       return second_buffer
+    end
+    #--------------------------------------------------------------------------
+    # * Get Clipboard Data
+    #--------------------------------------------------------------------------
+    def get_clipboard_data
+      OpenClipboard.(0)
+      data = GetClipboardData.(7)
+      CloseClipboard.()
+      return "" if data == 0
+      mem = GlobalLock.(data)
+      size = GlobalSize.(data)
+      final_data = " "*(size-1)
+      Memcpy.(final_data, mem, size)
+      GlobalUnlock.(data)
+      final_data.to_ascii.to_utf8
     end
     #--------------------------------------------------------------------------
     # * Push text in clipboard
@@ -1107,6 +1124,7 @@ module UI
       # * Get the current char
       #--------------------------------------------------------------------------
       def letter
+        return "" if Keyboard.press?(:ctrl) && Keyboard.trigger?(:v)
         key_list.keys.each do |i|
           return char(i) if repeat?(i)
         end
