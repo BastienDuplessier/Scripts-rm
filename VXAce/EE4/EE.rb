@@ -25,7 +25,7 @@
 # TI-MAX, Playm, Kmkzy
 #==============================================================================
 
-# This version : 4.5
+# This version : 4.5.2
 # Official website of the project : http://eventextender.gri.im
 
 #==============================================================================
@@ -315,6 +315,7 @@ class Win32API
   Memcpy = self.new('msvcrt','memcpy', 'ipi', 'i')
   MultiByteToWideChar = self.new('kernel32', 'MultiByteToWideChar', 'ilpipi', 'i')
   OpenClipboard = self.new('user32', 'OpenClipboard', 'i', 'i')
+  PeekMessage = self.new('user32', 'PeekMessage', 'piiii', 'i')
   Recv = self.new('ws2_32', 'recv', 'ppll', 'l')
   RegisterClipboardFormat = self.new('user32', 'RegisterClipboardFormat', 'p', 'i')
   RegOpenKeyExA = self.new('advapi32.dll', 'RegOpenKeyExA', 'LPLLP', 'L')
@@ -762,41 +763,45 @@ end
 
 class Numeric
    #--------------------------------------------------------------------------
+   # * handle isoler
+   #--------------------------------------------------------------------------
+   def isole_int(i); (self%(10**i))/(10**(i-1)).to_i; end
+   #--------------------------------------------------------------------------
    # * Number's units digit
    #--------------------------------------------------------------------------
-   def units; self % 10; end
+   def units; isole_int(1); end
    #--------------------------------------------------------------------------
    # * Number's tens digit
    #--------------------------------------------------------------------------
-   def tens; ((self % 100)/10).to_i; end
+   def tens; isole_int(2); end
    #--------------------------------------------------------------------------
    # * Number's hundreds digit
    #--------------------------------------------------------------------------
-   def hundreds; ((self % 1000)/100).to_i; end
+   def hundreds; isole_int(3); end
    #--------------------------------------------------------------------------
    # * Number's thousands digit
    #--------------------------------------------------------------------------
-   def thousands; ((self % 10000)/1000).to_i; end
+   def thousands; isole_int(4); end
    #--------------------------------------------------------------------------
    # * Number's tens of thousands digit
    #--------------------------------------------------------------------------
-   def tens_thousands; ((self % 100000)/10000).to_i; end
+   def tens_thousands; isole_int(5); end
    #--------------------------------------------------------------------------
    # * Number's hundreds of thousands digit
    #--------------------------------------------------------------------------
-   def hundreds_thousands; ((self % 1000000)/100000).to_i; end
+   def hundreds_thousands; isole_int(6); end
    #--------------------------------------------------------------------------
    # * Number's millions digit
    #--------------------------------------------------------------------------
-   def millions; ((self % 10000000)/1000000).to_i; end
+   def millions; isole_int(7); end
    #--------------------------------------------------------------------------
    # * Number's tens of millions digit
    #--------------------------------------------------------------------------
-   def tens_millions; ((self % 100000000)/10000000).to_i; end
+   def tens_millions; isole_int(8); end
    #--------------------------------------------------------------------------
    # * Number's hundreds of millions digit
    #--------------------------------------------------------------------------
-   def hundreds_millions; ((self % 1000000000)/100000000).to_i; end
+   def hundreds_millions; isole_int(9); end
    #--------------------------------------------------------------------------
    # * alias
    #--------------------------------------------------------------------------
@@ -828,122 +833,31 @@ module UI
     #--------------------------------------------------------------------------
     # * Constants
     #--------------------------------------------------------------------------
-    Keys = Hash.new
-    Keys[:mouse_left] = 0x01
-    Keys[:mouse_right] = 0x02
-    Keys[:mouse_center] = 0x04
-    Keys[:backspace] = 0x08
-    Keys[:tab] = 0x09
-    Keys[:clear] = 0x0C
-    Keys[:enter] = 0x0D
-    Keys[:shift] = 0x10
-    Keys[:ctrl] = 0x11
-    Keys[:alt] = 0x12
-    Keys[:pause] = 0x13
-    Keys[:caps_lock] = 0x14
-    Keys[:esc] = 0x1B
-    Keys[:space] = 0x20
-    Keys[:page_up] = 0x21
-    Keys[:page_down] = 0x22
-    Keys[:end] = 0x23
-    Keys[:home] = 0x24
-    Keys[:left] = 0x25
-    Keys[:up] = 0x26
-    Keys[:right] = 0x27
-    Keys[:down] = 0x28
-    Keys[:select] = 0x29
-    Keys[:print] = 0x2A
-    Keys[:snapshot] = 0x2C
-    Keys[:execute] = 0x2B
-    Keys[:insert] = 0x2D
-    Keys[:delete] = 0x2E
-    Keys[:help] = 0x2F
-    Keys[:zero] = 0x30
-    Keys[:one] = 0x31
-    Keys[:two] = 0x32
-    Keys[:three] = 0x33
-    Keys[:four] = 0x34
-    Keys[:five] = 0x35
-    Keys[:six] = 0x36
-    Keys[:seven] = 0x37
-    Keys[:eight] = 0x38
-    Keys[:nine] = 0x39
-    Keys[:minus] = 0xBD
-    Keys[:a] = 0x41
-    Keys[:b] = 0x42
-    Keys[:c] = 0x43
-    Keys[:d] = 0x44
-    Keys[:e] = 0x45
-    Keys[:f] = 0x46
-    Keys[:g] = 0x47
-    Keys[:h] = 0x48
-    Keys[:i] = 0x49
-    Keys[:j] = 0x4A
-    Keys[:k] = 0x4B
-    Keys[:l] = 0x4C
-    Keys[:m] = 0x4D
-    Keys[:n] = 0x4E
-    Keys[:o] = 0x4F
-    Keys[:p] = 0x50
-    Keys[:q] = 0x51
-    Keys[:r] = 0x52
-    Keys[:s] = 0x53
-    Keys[:t] = 0x54
-    Keys[:u] = 0x55
-    Keys[:v] = 0x56
-    Keys[:w] = 0x57
-    Keys[:x] = 0x58
-    Keys[:y] = 0x59
-    Keys[:z] = 0x5A
-    Keys[:lwindow] = 0x5B
-    Keys[:rwindow] = 0x5C
-    Keys[:apps] = 0x5D
-    Keys[:num_zero] = 0x60
-    Keys[:num_one] = 0x61
-    Keys[:num_two] = 0x62
-    Keys[:num_three] = 0x63
-    Keys[:num_four] = 0x64
-    Keys[:num_five] = 0x65
-    Keys[:num_six] = 0x66
-    Keys[:num_seven] = 0x67
-    Keys[:num_eight] = 0x68
-    Keys[:num_nine] = 0x69
-    Keys[:multiply] = 0x6A
-    Keys[:add] = 0x6B
-    Keys[:separator] = 0x6C
-    Keys[:substract] = 0x6D
-    Keys[:decimal] = 0x6E
-    Keys[:divide] = 0x6F
-    Keys[:f1] = 0x70
-    Keys[:f2] = 0x71
-    Keys[:f3] = 0x72
-    Keys[:f4] = 0x73
-    Keys[:f5] = 0x74
-    Keys[:f6] = 0x75
-    Keys[:f7] = 0x76
-    Keys[:f8] = 0x77
-    Keys[:f9] = 0x78
-    Keys[:f10] = 0x79
-    Keys[:f11] = 0x7A
-    Keys[:f12] = 0x7B
-    Keys[:num_lock] = 0x90
-    Keys[:scroll_lock] = 0x91
-    Keys[:lshift] = 0xA0
-    Keys[:rshift] = 0xA1
-    Keys[:lcontrol] = 0xA2
-    Keys[:rcontrol] = 0xA3
-    Keys[:lmenu] = 0xA4
-    Keys[:rmenu] = 0xA5
-    Keys[:circumflex] = 0xDD
-    Keys[:dollar] = 0xBA
-    Keys[:close_parenthesis] = 0xDB
-    Keys[:u_grav] = 0xC0
-    Keys[:square] = 0xDE
-    Keys[:less_than] = 0xE2
-    Keys[:colon] = 0xBF
-    Keys[:semicolon] = 0xBE
-    Keys[:equal] = 0xBB
-    Keys[:comma] = 0xBC
+    Keys = {
+      mouse_left: 0x01, mouse_right: 0x02, mouse_center: 0x04,
+      backspace: 0x08, tab: 0x09, clear: 0x0C, enter: 0x0D,
+      shift: 0x10, ctrl: 0x011, alt: 0x12, pause: 0x13, 
+      caps_lock: 0x14, esc: 0x1B, space: 0x20, page_up: 0x21,
+      page_down: 0x22, end: 0x23, home: 0x24, left: 0x25, up: 0x26,
+      right: 0x27, down: 0x28, select: 0x29, print: 0x2A, snapshot: 0x2C,
+      execute: 0x2B, insert: 0x2D, delete: 0x2E, help: 0x2F, zero: 0x30,
+      one: 0x31, two: 0x32, three: 0x33, four: 0x34, five: 0x35, six: 0x36,
+      seven: 0x37, eight: 0x38, nine: 0x39, minus: 0xBD, a: 0x41, 
+      b: 0x42, c: 0x43, d: 0x44, e: 0x45, f: 0x46, g: 0x47, h: 0x48,
+      i: 0x49, j: 0x4A, k: 0x4B, l: 0x4C, m: 0x4D, n: 0x4E, o: 0x4F, p: 0x50, 
+      q: 0x51, r: 0x52, s: 0x53, t: 0x54, u: 0x55, v: 0x56, w: 0x57, x: 0x58, 
+      y: 0x59, z: 0x5A, lwindow: 0x5B, rwindow: 0x5C, apps: 0x5D, 
+      num_zero: 0x60, num_one: 0x61, num_two: 0x62, num_three: 0x63, 
+      num_four: 0x64, num_five: 0x65, num_six: 0x66, num_seven: 0x67, 
+      num_eight: 0x68, num_nine: 0x69, multiply: 0x6A, add: 0x6B, separator: 0x6C, 
+      substract: 0x6D, decimal: 0x6E, divide: 0x6F, f1: 0x70, f2: 0x71, f3: 0x72,
+      f4: 0x73, f5: 0x74, f6: 0x75, f7: 0x76, f8: 0x77, f9: 0x78, f10: 0x79, 
+      f11: 0x7A, f12: 0x7B, num_lock: 0x90, scroll_lock: 0x91, 
+      lshift: 0xA0, rshift: 0xA1, lcontrol: 0xA2, rcontrol: 0xA3, lmenu: 0xA4,
+      rmenu: 0xA5, circumflex: 0xDD, dollar: 0xBA, close_parenthesis: 0xDB, 
+      u_grav: 0xC0, square: 0xDE, less_than: 0xE2, colon: 0xBF, semicolon: 0xBE,
+      equal: 0xBB, comma: 0xBC
+    }
     #--------------------------------------------------------------------------
     # * key list
     #--------------------------------------------------------------------------
@@ -1232,6 +1146,7 @@ module UI
     # * Class Variables
     #--------------------------------------------------------------------------
     @@x = @@y = @@old_x = @@old_y = 0
+    @@wheel = 0
     @@rect = Rect.new(1, 1, 1, 1)
     #--------------------------------------------------------------------------
     # * Singleton
@@ -1241,8 +1156,20 @@ module UI
       # * Mouse update
       #--------------------------------------------------------------------------
       def update
+        #wheel_update
         position_update
         rect_update
+      end
+      #--------------------------------------------------------------------------
+      # * Update Wheel
+      #--------------------------------------------------------------------------
+      def wheel_update
+        buffer =  [].pack('x32')
+        state = Win32API::PeekMessage.(buffer,RGSSHWND,0x020A,0x020A,0)
+        if state <= 0; @@wheel = 0
+        elsif buffer.getbyte(11) == 0; @@wheel = 1
+        else; @@wheel = -1
+        end
       end
       #--------------------------------------------------------------------------
       # * Position update
@@ -1273,6 +1200,10 @@ module UI
       def key_pushable?(key_code)
         Win32API::GetKeyState.(key_code) > 1
       end
+      #--------------------------------------------------------------------------
+      # * Get Wheel state
+      #--------------------------------------------------------------------------
+      def wheel; @@wheel; end
       #--------------------------------------------------------------------------
       # * Get X position
       #--------------------------------------------------------------------------
@@ -2671,7 +2602,7 @@ class Sprite_Character
     if character
       x_rect, y_rect = self.x-self.ox, self.y-self.oy
       rect_witdh, rect_height = self.src_rect.width, self.src_rect.height
-      character.rect = Rect.new(x_rect, y_rect, rect_witdh, rect_height)
+      character.rect.set(x_rect, y_rect, rect_witdh, rect_height)
       unless self.character.buzz== nil || self.character.buzz == 0
         transformation = self.calc_buzz
         self.zoom_x += transformation 
@@ -4459,7 +4390,10 @@ module Command_Description
   #--------------------------------------------------------------------------
   def random
     {description:"Renvoi un nombre aléatoire compris entre Minimum et Maximum",
-      args:[{name:"Minimum", type: :int}, {name:"Maximum", type: :int}],
+      args:[
+         {name:"Minimum", type: :int}, 
+         {name:"Maximum", type: :int}
+      ],
       returnable: true}
   end
   def map_id
@@ -4489,7 +4423,7 @@ module Command_Description
     {description:"Renvoi l'argent possédé par l'équipe", returnable: true}
   end
   def steps
-    {description:"Renvoi l'id de la map jouée", returnable: true}
+    {description:"Renvoi le nombre de pas effectué par l'équipe", returnable: true}
   end
   def play_time
     {description:"Renvoi la durée de la partie", returnable: true}
@@ -5175,9 +5109,9 @@ module Command_Description
     {description:"Crée un champs saisissable au clavier", 
       args:[
         {name:"Type de contenu", type: :enum, enum:[:integer, :float, :text]},
-        {name:"X", type: :integer},
-        {name:"Y", type: :integer},
-        {name:"Largeur", type: :integer, default: 200},
+        {name:"X", type: :int},
+        {name:"Y", type: :int},
+        {name:"Largeur", type: :int, default: 200},
         {name:"Texte par défaut", type: :string},
         {name:"Alignement", type: :enum, enum:[:left, :center, :right]}
         ],
