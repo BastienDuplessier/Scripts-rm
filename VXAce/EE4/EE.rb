@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #==============================================================================
 # ** The Event Extender
 #------------------------------------------------------------------------------
@@ -25,7 +26,7 @@
 # TI-MAX, Playm, Kmkzy
 #==============================================================================
 
-# This version : 4.5.3
+# This version : 4.5.4
 # Official website of the project : http://eventextender.gri.im
 
 #==============================================================================
@@ -43,6 +44,27 @@ module Configuration
   # * Key to launch In Game Eval
   #--------------------------------------------------------------------------
   KEY_INGAME_EVAL = :f4
+  #==============================================================================
+  # ** Lang
+  #------------------------------------------------------------------------------
+  # Language definition
+  #==============================================================================
+  module Lang
+    extend self
+    #--------------------------------------------------------------------------
+    # * Language Definition
+    #--------------------------------------------------------------------------
+    def command_in_clipboard; "Commande mise dans le presse papier"; end
+    def text_in_clipboard; "Texte mis dans le presse papier"; end
+    def create_command; "Créer Commande"; end
+    def create_text; "Créer Texte"; end
+    def in; "Dans : "; end
+    def noargs; "Cette méthode ne prend pas d'arguments"; end
+    def gen; "Génération de la commande "; end
+    def title_cmd; "Sélectionnez une commande à générer"; end
+    def format; :formaté; end
+    def free; :libre; end
+  end
 end
 
 #==============================================================================
@@ -1299,7 +1321,7 @@ module UI
         end
         if @past.hover? && UI::Mouse.trigger?(:mouse_left)
           Win32API.push_in_clipboard(RPG::EventCommand.new(355, 0, [@evalbox.value]))
-          Win32API::MessageBox.(0, "Command push in Clipboard", "Info:", 0)
+          Win32API::MessageBox.(0, Configuration::Lang.command_in_clipboard, "Info:", 0)
         end
       end
       #--------------------------------------------------------------------------
@@ -1412,7 +1434,7 @@ module UI
         @in_transfert = $game_map.screen.tone_duration > 0
         if @past.hover? && UI::Mouse.trigger?(:mouse_left)
           Win32API.push_in_clipboard(RPG::EventCommand.new(223, 0, [n_t, @time.value, @checkbox.value]))
-          Win32API::MessageBox.(0, "Command push in Clipboard", "Info:", 0)
+          Win32API::MessageBox.(0, Configuration::Lang.command_in_clipboard, "Info:", 0)
         end
       end
       #--------------------------------------------------------------------------
