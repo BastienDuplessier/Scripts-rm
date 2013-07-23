@@ -22,93 +22,20 @@ module Configuration
 end
 
 #==============================================================================
-# ** Util
-#------------------------------------------------------------------------------
-# Usefull tools
-#==============================================================================
-
-module Util
-  #--------------------------------------------------------------------------
-  # * Singleton
-  #--------------------------------------------------------------------------
-  extend self
-  #--------------------------------------------------------------------------
-  # * if RPG MAKER XP
-  #--------------------------------------------------------------------------
-  def rpg_maker_xp?
-    defined?(Hangup)
-  end
-  #--------------------------------------------------------------------------
-  # * if RPG MAKER VX
-  #--------------------------------------------------------------------------
-  def rpg_maker_vx?
-    !rpg_maker_xp? && (RUBY_VERSION == '1.8.1')
-  end
-  #--------------------------------------------------------------------------
-  # * if RPG MAKER VXAce
-  #--------------------------------------------------------------------------
-  def rpg_maker_vxace?
-    RUBY_VERSION == '1.9.2'
-  end
-  #--------------------------------------------------------------------------
-  # * alias
-  #--------------------------------------------------------------------------
-  alias :rmxp?    :rpg_maker_xp?
-  alias :rmvx?    :rpg_maker_vx?
-  alias :rmvxace? :rpg_maker_vxace?
-  #--------------------------------------------------------------------------
-  # * Get Screen Object
-  #--------------------------------------------------------------------------
-  def get_screen
-    return $game_map.screen if rpg_maker_vxace?
-    $game_screen
-  end
-  #--------------------------------------------------------------------------
-  # * Debug mode
-  #--------------------------------------------------------------------------
-  def from_editor?
-    $TEST || $DEBUG
-  end
-  #--------------------------------------------------------------------------
-  # * Get current Scene
-  #--------------------------------------------------------------------------
-  def scene
-    return SceneManager.scene if rpg_maker_vxace?
-    $scene
-  end
-  #--------------------------------------------------------------------------
-  # * Window Handle
-  #--------------------------------------------------------------------------
-  def handle
-    Win32API::FindWindowA.call('RGSS Player', 0)
-  end
-end
-
-#==============================================================================
-# ** Win32API
-#------------------------------------------------------------------------------
-#  win32/registry is registry accessor library for Win32 platform. 
-#  It uses dl/import to call Win32 Registry APIs.
-#==============================================================================
-
-class Win32API
-  #--------------------------------------------------------------------------
-  # * Librairy
-  #--------------------------------------------------------------------------
-  AllocConsole        = self.new('kernel32', 'AllocConsole', 'v', 'l')
-  FindWindowA         = self.new('user32', 'FindWindowA', 'pp', 'i')
-  SetForegroundWindow = self.new('user32', 'SetForegroundWindow','l','l')
-  SetConsoleTitleA    = self.new('kernel32','SetConsoleTitleA','p','s')
-  WriteConsoleOutput  = self.new('kernel32', 'WriteConsoleOutput', 'lpllp', 'l' )
-end
-
-#==============================================================================
 # ** Console
 #------------------------------------------------------------------------------
 #  VXAce Console Handling
 #==============================================================================
 
 module Console
+  #--------------------------------------------------------------------------
+  # * Librairy
+  #--------------------------------------------------------------------------
+  AllocConsole        = Win32API.new('kernel32', 'AllocConsole', 'v', 'l')
+  FindWindowA         = Win32API.new('user32', 'FindWindowA', 'pp', 'i')
+  SetForegroundWindow = Win32API.new('user32', 'SetForegroundWindow','l','l')
+  SetConsoleTitleA    = Win32API.new('kernel32','SetConsoleTitleA','p','s')
+  WriteConsoleOutput  = Win32API.new('kernel32', 'WriteConsoleOutput', 'lpllp', 'l' )
   #--------------------------------------------------------------------------
   # * Singleton
   #--------------------------------------------------------------------------
@@ -117,11 +44,12 @@ module Console
   # * Initialize
   #--------------------------------------------------------------------------
   def init
-    unless Util.rmvxace?
-      return unless Util.from_editor?
-      Win32API::AllocConsole.call
-      Win32API::SetForegroundWindow.call(Util.handle)
-      Win32API::SetConsoleTitleA.call("RGSS Console")
+    if (RUBY_VERSION != '1.9.2')
+      return unless ($TEST || $DEBUG)
+      hwnd = FindWindowA.call('RGSS Player', 0)
+      AllocConsole.call
+      SetForegroundWindow.call(hwnd)
+      SetConsoleTitleA.call("RGSS Console")
       $stdout.reopen('CONOUT$')
     end
   end
@@ -129,8 +57,8 @@ module Console
   # * Log
   #--------------------------------------------------------------------------
   def log(*data)
-    return unless Util.from_editor?
-    if Util.rmvxace?
+    return unless ($TEST || $DEBUG)
+    if (RUBY_VERSION == '1.9.2')
       p(*data)
       return
     end
@@ -154,7 +82,7 @@ module Kernel
   #--------------------------------------------------------------------------
   # * pretty print
   #--------------------------------------------------------------------------
-  if !Util.rmvxace? && Util.from_editor?
+  if (RUBY_VERSION != '1.9.2') && ($TEST || $DEBUG)
     def p(*args)
       console.log(*args)
     end
