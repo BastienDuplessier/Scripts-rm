@@ -17,7 +17,7 @@
 # - Zangther (Some various help and Regexp)
 # - Lidenvice (Help for test and ergonomic reflection and proofreading)
 # - Ulis (proofreading)
-# - Hiino ♥ (proofreading and translation)
+# - Hiino ? (proofreading and translation)
 #------------------------------------------------------------------------------
 # And for their social and technic help:
 # Magi, Hiino, XHTMLBoy, Raho, Joke, Al Rind, Testament, 
@@ -3044,7 +3044,13 @@ class Game_Event
   def update
     extender_update
     if cmd(:mouse_clicked_event?, @id, :mouse_left)
-      Game_Event.last_clicked_event = @id 
+      Game_Event.last_clicked_event[:mouse_left] = @id 
+    end
+  	if cmd(:mouse_clicked_event?, @id, :mouse_right)
+      Game_Event.last_clicked_event[:mouse_right] = @id 
+    end
+		if cmd(:mouse_clicked_event?, @id, :mouse_center)
+      Game_Event.last_clicked_event[:mouse_center] = @id 
     end
   end
 end
@@ -3068,7 +3074,13 @@ class Game_Player
   def update
     extender_update
     if cmd(:mouse_clicked_event?, 0, :mouse_left)
-      Game_Event.last_clicked_event = 0
+      Game_Event.last_clicked_event[:mouse_left] = 0
+    end
+		 if cmd(:mouse_clicked_event?, 0, :mouse_right)
+      Game_Event.last_clicked_event[:mouse_right] = 0
+    end
+		 if cmd(:mouse_clicked_event?, 0, :mouse_center)
+      Game_Event.last_clicked_event[:mouse_center] = 0
     end
   end
 end
@@ -3635,7 +3647,9 @@ module Command
   #--------------------------------------------------------------------------
   # * Return ID of the last clicked event
   #--------------------------------------------------------------------------
-  def last_clicked_event; Game_Event.last_clicked_event; end
+  def last_clicked_event(k = :mouse_left) 
+		Game_Event.last_clicked_event[k] || -1
+	end
   #--------------------------------------------------------------------------
   # * Determine if the player is clicked
   #--------------------------------------------------------------------------
