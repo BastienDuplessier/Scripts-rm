@@ -26,7 +26,7 @@
 # TI-MAX, Playm, Kmkzy
 #==============================================================================
 
-# This version : 4.5.4
+# This version : 4.5.4.2
 # Official website of the project : http://eventextender.gri.im
 
 #==============================================================================
@@ -3948,6 +3948,12 @@ module Command
     pictures[id].pin = false
   end
   #--------------------------------------------------------------------------
+  # * Change Picture Opacity
+  #--------------------------------------------------------------------------
+  def picture_opacity(id, value)
+    pictures[id].opacity = value
+  end
+  #--------------------------------------------------------------------------
   # * Shake the picture
   #--------------------------------------------------------------------------
   def picture_shake(id, power, speed, duration)
@@ -4428,6 +4434,7 @@ module Command_Description
   #--------------------------------------------------------------------------
   # * Description of standard commands
   #--------------------------------------------------------------------------
+  
   def random
     {description:"Renvoi un nombre aléatoire compris entre Minimum et Maximum",
       args:[
@@ -4961,6 +4968,10 @@ module Command_Description
   def picture_erase
     {description:"Supprime une image (référencée par son ID)", 
       args:[{name:"ID", type: :int}]}
+  end
+  def picture_opacity
+    {description:"Modifie l'opacité d'une image (référencée par son ID)", 
+      args:[{name:"ID", type: :int}, {name:"Valeur", type: :int}]}
   end
   def parallax_show
     {description:"Crée un panorama", 
