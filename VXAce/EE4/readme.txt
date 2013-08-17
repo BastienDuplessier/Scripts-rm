@@ -1,6 +1,6 @@
 Event Extender
 ---------------------------------
-Version actuelle : 4.5.4.2
+Version actuelle : 4.5.5
 
 Dernière mise à jours le 17/08/2013
 ---------------------------------
