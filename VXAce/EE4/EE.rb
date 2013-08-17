@@ -14,6 +14,7 @@
 # - Fabien (Buzzer Command)
 # - Avygeil (A lot of inspiration)
 # - Heos (Beta test)
+# - ParadoxII (Beta test and sugestion ♥)
 # - Zangther (Some various help and Regexp)
 # - Lidenvice (Help for test and ergonomic reflection and proofreading)
 # - Ulis (proofreading)
