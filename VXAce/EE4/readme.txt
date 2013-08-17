@@ -1,15 +1,16 @@
 Event Extender
 ---------------------------------
-Version actuelle : 4.5.4
+Version actuelle : 4.5.4.2
 
-Dernière mise à jours le 04/06/2013 à 23h00
+DerniÃ¨re mise Ã  jours le 17/08/2013
 ---------------------------------
 
-
-04/06/2013 -> Prise en charge des caractères spéciaux pour l'Extend Editor
-04/06/2013 -> Amélioration de l'Extend Editor
+17/08/2013 -> Ajout de picture_opacity(id, value)
+16/08/2013 -> Correction de certaines commandes
+04/06/2013 -> Prise en charge des caractï¿½res spï¿½ciaux pour l'Extend Editor
+04/06/2013 -> Amï¿½lioration de l'Extend Editor
 04/06/2013 -> Reformulation de certaines de parties du code
 31/05/2013 -> Ajout des plages, des teintes de panorama, du module Description
 07/05/2013 -> Ajout des touches :delete, :insert et :snapshot
-07/05/2013 -> Ajout de la gestion des range dans la syntaxe abrègée des variables
+07/05/2013 -> Ajout de la gestion des range dans la syntaxe abrï¿½gï¿½e des variables
 12/04/2013 -> Ajout d'un plugin : Keys Combination
