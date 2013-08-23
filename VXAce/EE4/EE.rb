@@ -715,10 +715,10 @@ module S
   def []=(key, value)
     if key.is_a?(Range)
       key.each do |k|
-        $game_variables[k] = value.to_bool
+        $game_switches[k] = value.to_bool
       end
     else
-      $game_variables[key] = value.to_bool
+      $game_switches[key] = value.to_bool
     end
   end
 end
