@@ -22,7 +22,8 @@ module BaseItem
   #--------------------------------------------------------------------------
   # * Setup a Baseitem
   #--------------------------------------------------------------------------
-  def setup_base(id, list)
+  def setup_base(id, l)
+    list = l.dup
     @id = list[id].id
     @name = list[id].name
     @icon_index = list[id].icon_index
@@ -46,7 +47,8 @@ module EquipItem
   #--------------------------------------------------------------------------
    # * Setup an EquipItem
     #--------------------------------------------------------------------------
-  def setup_equip(id, list)
+  def setup_equip(id, l)
+    list = l.dup
     setup_base(id, list)
     @price = list[id].price
     @etype_id = list[id].etype_id
@@ -68,7 +70,8 @@ module UsableItem
   #--------------------------------------------------------------------------
   # * Setup an UsableItem
   #--------------------------------------------------------------------------
-  def setup_usable(id, list)
+  def setup_usable(id, l)
+    list = l.dup
     setup_base(id, list)
     @scope = list[id].scope
     @occasion = list[id].occasion
