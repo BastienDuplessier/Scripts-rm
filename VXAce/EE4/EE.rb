@@ -14,7 +14,6 @@
 # - Fabien (Buzzer Command)
 # - Avygeil (A lot of inspiration)
 # - Heos (Beta test)
-# - ParadoxII (Beta test and sugestion ♥)
 # - Zangther (Some various help and Regexp)
 # - Lidenvice (Help for test and ergonomic reflection and proofreading)
 # - Ulis (proofreading)
@@ -715,10 +714,10 @@ module S
   def []=(key, value)
     if key.is_a?(Range)
       key.each do |k|
-        $game_switches[k] = value.to_bool
+        $game_variables[k] = value.to_bool
       end
     else
-      $game_switches[key] = value.to_bool
+      $game_variables[key] = value.to_bool
     end
   end
 end
@@ -3720,6 +3719,18 @@ module Command
   #--------------------------------------------------------------------------
   def event_screen_y(id); event(id).screen_y; end
   #--------------------------------------------------------------------------
+  # * Get the y of an event in pixels
+  #--------------------------------------------------------------------------
+  def event_pixel_y(id) 
+    ($game_map.display_y * 32) + event_screen_y(id)
+  end
+  #--------------------------------------------------------------------------
+  # * Get the x of an event in pixels
+  #--------------------------------------------------------------------------
+  def event_pixel_x(id) 
+    ($game_map.display_x * 32) + event_screen_x(id)
+  end
+  #--------------------------------------------------------------------------
   # * Get the direction of an event
   #--------------------------------------------------------------------------
   def event_direction(id); event(id).direction; end
@@ -3739,6 +3750,14 @@ module Command
   # * Get the y (on screen) of the player
   #--------------------------------------------------------------------------
   def player_screen_y; event(0).screen_y; end
+  #--------------------------------------------------------------------------
+  # * Get the x of player in pixels
+  #--------------------------------------------------------------------------
+  def player_pixel_x; event_pixel_x(0); end
+  #--------------------------------------------------------------------------
+  # * Get the y of player in pixels
+  #--------------------------------------------------------------------------
+  def player_pixel_y; event_pixel_y(0); end
   #--------------------------------------------------------------------------
   # * Get the direction of the player
   #--------------------------------------------------------------------------
@@ -3761,6 +3780,28 @@ module Command
   # * Pixels between two event
   #--------------------------------------------------------------------------
   def pixels_between(ev1, ev2); distance_between(:pixel, ev1, ev2); end
+  #--------------------------------------------------------------------------
+  # * Event look another event
+  #--------------------------------------------------------------------------
+  def look_at(ev, to, scope, metric = :square)
+    if event_direction(ev) == 8
+      x_axis = event_x(to) == event_x(ev)
+      y_axis = event_y(ev) > event_y(to)
+    end
+    if event_direction(ev) == 2
+      x_axis = event_x(to) == event_x(ev)
+      y_axis = event_y(ev) < event_y(to)
+    end
+    if event_direction(ev) == 4
+      x_axis = event_x(to) < event_x(ev)
+      y_axis = event_y(ev) == event_y(to)
+    end
+    if event_direction(ev) == 6
+      x_axis = event_x(to) > event_x(ev)
+      y_axis = event_y(ev) == event_y(to)
+    end
+    return x_axis && y_axis && (distance_between(metric, ev, to)<=scope)
+  end
   #--------------------------------------------------------------------------
   # * Move event to x, y coords
   #--------------------------------------------------------------------------
@@ -4774,6 +4815,16 @@ module Command_Description
       args:[{name:"ID", type: :int}],
       returnable: true}
   end
+  def event_pixel_x
+    {description:"Renvoi la position X (en pixel) d'un évènement en fonction de son ID", 
+      args:[{name:"ID", type: :int}],
+      returnable: true}
+  end
+  def event_pixel_y
+    {description:"Renvoi la position Y (en pixel) d'un évènement en fonction de son ID", 
+      args:[{name:"ID", type: :int}],
+      returnable: true}
+  end
   def event_screen_y
     {description:"Renvoi la position Y (en pixel par rapport à l'écran) d'un évènement en fonction de son ID", 
       args:[{name:"ID", type: :int}],
@@ -4791,6 +4842,14 @@ module Command_Description
     {description:"Renvoi la position Y (en case) du joueur", 
       returnable: true}
   end
+  def player_pixel_x
+    {description:"Renvoi la position X en pixel du joueur", 
+      returnable: true}
+  end
+  def player_pixel_y
+    {description:"Renvoi la position Y en pixel du joueur", 
+      returnable: true}
+  end
   def player_screen_x
     {description:"Renvoi la position X (en pixel par rapport à l'écran) du joueur", 
       returnable: true}
@@ -4801,6 +4860,14 @@ module Command_Description
   end
   def player_direction
     {description:"Renvoi la direction (2,4,6,8) du joueur", 
+      returnable: true}
+  end
+  def look_at
+    {description:"Renvoi true si ID 1 regarde ID 2, false sinon", 
+      args:[{name:"ID 1", type: :int},
+        {name:"ID 2", type: :int},
+        {name:"portee", type: :int},
+        {name:"Unites", type: :enum, enum:[:square, :pixel]}],
       returnable: true}
   end
   def squares_between
