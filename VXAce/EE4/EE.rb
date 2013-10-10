@@ -2110,10 +2110,46 @@ module Area
       hover? && UI::Mouse.click?(key)
     end
     #--------------------------------------------------------------------------
+    # * check if the mouse 's trigger the rect
+    #--------------------------------------------------------------------------
+    def triggered?(key)
+      hover? && UI::Mouse.trigger?(key)
+    end
+    #--------------------------------------------------------------------------
+    # * check if the mouse 's release the rect
+    #--------------------------------------------------------------------------
+    def released?(key)
+      hover? && UI::Mouse.release?(key)
+    end
+    #--------------------------------------------------------------------------
+    # * check if the mouse 's repeated the rect
+    #--------------------------------------------------------------------------
+    def repeated?(key)
+      hover? && UI::Mouse.repeat?(key)
+    end
+    #--------------------------------------------------------------------------
     # * check if the mouse 's click the rect (square)
     #--------------------------------------------------------------------------
     def clicked_square?(key)
       hover_square? && UI::Mouse.click?(key)
+    end
+    #--------------------------------------------------------------------------
+    # * check if the mouse 's trigger the rect (square)
+    #--------------------------------------------------------------------------
+    def triggered_square?(key)
+      hover_square? && UI::Mouse.trigger?(key)
+    end
+    #--------------------------------------------------------------------------
+    # * check if the mouse 's repeat the rect (square)
+    #--------------------------------------------------------------------------
+    def repeated_square?(key)
+      hover_square? && UI::Mouse.repeat?(key)
+    end
+    #--------------------------------------------------------------------------
+    # * check if the mouse 's release the rect (square)
+    #--------------------------------------------------------------------------
+    def released_square?(key)
+      hover_square? && UI::Mouse.release?(key)
     end
   end
 
@@ -4243,9 +4279,33 @@ module Command
   #--------------------------------------------------------------------------
   def mouse_clicked_area?(area, key); area.clicked?(key); end 
   #--------------------------------------------------------------------------
+  # * Check trigger an area
+  #--------------------------------------------------------------------------
+  def mouse_triggered_area?(area, key); area.triggered?(key); end 
+  #--------------------------------------------------------------------------
+  # * Check release an area
+  #--------------------------------------------------------------------------
+  def mouse_released_area?(area, key); area.released?(key); end 
+  #--------------------------------------------------------------------------
+  # * Check repeat an area
+  #--------------------------------------------------------------------------
+  def mouse_repeated_area?(area, key); area.repeated?(key); end 
+  #--------------------------------------------------------------------------
   # * Check click an area (square)
   #--------------------------------------------------------------------------
   def mouse_square_clicked_area?(area, key); area.clicked_square?(key); end 
+  #--------------------------------------------------------------------------
+  # * Check trigger an area (square)
+  #--------------------------------------------------------------------------
+  def mouse_square_triggered_area?(area, key); area.triggered_square?(key); end 
+  #--------------------------------------------------------------------------
+  # * Check repeat an area (square)
+  #--------------------------------------------------------------------------
+  def mouse_square_repeated_area?(area, key); area.repeated_square?(key); end 
+  #--------------------------------------------------------------------------
+  # * Check release an area (square)
+  #--------------------------------------------------------------------------
+  def mouse_square_released_area?(area, key); area.released_square?(key); end 
     
   #==============================================================================
   # ** User form
