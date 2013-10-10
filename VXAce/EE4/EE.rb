@@ -26,7 +26,7 @@
 # TI-MAX, Playm, Kmkzy
 #==============================================================================
 
-# This version : 4.5.5
+# This version : 4.5.6
 # Official website of the project : http://eventextender.gri.im
 
 #==============================================================================
