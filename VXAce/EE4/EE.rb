@@ -5269,7 +5269,31 @@ module Command_Description
       returnable: true}
   end
   def mouse_clicked_area?
-    {description:"Renvoi true si la souris clic la zone, false sinon", 
+    {description:"Renvoi true si la souris clic (en continu) la zone, false sinon", 
+      args:[
+        {name:"Zone", type: :none},
+        {name:"Touche", type: :enum, enum:[:mouse_left, :mouse_center, :mouse_right]}
+        ],
+      returnable: true}
+  end
+  def mouse_triggered_area?
+    {description:"Renvoi true si la souris clic ponctuellement la zone, false sinon", 
+      args:[
+        {name:"Zone", type: :none},
+        {name:"Touche", type: :enum, enum:[:mouse_left, :mouse_center, :mouse_right]}
+        ],
+      returnable: true}
+  end
+  def mouse_repeated_area?
+    {description:"Renvoi true si la souris clic (de manière répétée) la zone, false sinon", 
+      args:[
+        {name:"Zone", type: :none},
+        {name:"Touche", type: :enum, enum:[:mouse_left, :mouse_center, :mouse_right]}
+        ],
+      returnable: true}
+  end
+  def mouse_released_area?
+    {description:"Renvoi true si la souris est relâchée sur la zone, false sinon", 
       args:[
         {name:"Zone", type: :none},
         {name:"Touche", type: :enum, enum:[:mouse_left, :mouse_center, :mouse_right]}
@@ -5277,7 +5301,31 @@ module Command_Description
       returnable: true}
   end
   def mouse_square_clicked_area?
-    {description:"Renvoi true si la souris clic la zone, false sinon (pour une zone définie en case)", 
+    {description:"Renvoi true si la souris clic (en continu) la zone, false sinon (pour une zone définie en case)", 
+      args:[
+        {name:"Zone", type: :none},
+        {name:"Touche", type: :enum, enum:[:mouse_left, :mouse_center, :mouse_right]}
+        ],
+      returnable: true}
+  end
+  def mouse_square_triggered_area?
+    {description:"Renvoi true si la souris clic (ponctuellement) la zone, false sinon (pour une zone définie en case)", 
+      args:[
+        {name:"Zone", type: :none},
+        {name:"Touche", type: :enum, enum:[:mouse_left, :mouse_center, :mouse_right]}
+        ],
+      returnable: true}
+  end
+  def mouse_square_repeated_area?
+    {description:"Renvoi true si la souris clic (de manière répétée) la zone, false sinon (pour une zone définie en case)", 
+      args:[
+        {name:"Zone", type: :none},
+        {name:"Touche", type: :enum, enum:[:mouse_left, :mouse_center, :mouse_right]}
+        ],
+      returnable: true}
+  end
+  def mouse_square_released_area?
+    {description:"Renvoi true si la souris est relâchée sur la zone, false sinon (pour une zone définie en case)", 
       args:[
         {name:"Zone", type: :none},
         {name:"Touche", type: :enum, enum:[:mouse_left, :mouse_center, :mouse_right]}
