@@ -5,6 +5,7 @@ Version actuelle : 4.5.5
 Dernière mise à jours le 17/08/2013
 ---------------------------------
 
+25/12/2013 -> Correction de x/y square
 17/08/2013 -> Ajout de picture_opacity(id, value)
 16/08/2013 -> Correction de certaines commandes
 04/06/2013 -> Prise en charge des caractères speciaux pour l'Extend Editor
